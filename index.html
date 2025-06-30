@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💀 BrownDogGames Arcade 💀</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      text-align: center;
+      padding: 60px 20px;
+      overflow-x: hidden;
+      overflow-y: auto;
+      user-select: none;
+    }
+    h1 {
+      font-size: 60px;
+      color: magenta;
+      text-shadow:
+        0 0 10px #ff00ff,
+        0 0 20px #ff00ff,
+        0 0 30px #ff00ff;
+      margin-bottom: 20px;
+      user-select: none;
+    }
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      user-select: none;
+    }
+    .button {
+      display: inline-block;
+      padding: 20px 50px;
+      font-size: 28px;
+      font-weight: 900;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      background: linear-gradient(45deg, crimson, hotpink);
+      color: #fff;
+      border: 5px dashed yellow;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow:
+        0 0 20px hotpink,
+        0 0 40px crimson,
+        0 0 60px magenta;
+      animation: neonPulse 2s ease-in-out infinite alternate;
+      text-decoration: none;
+      user-select: none;
+      transition: transform 0.1s ease;
+      margin-bottom: 20px;
+    }
+    .button:active {
+      transform: scale(0.9) rotate(-5deg);
+      box-shadow: 0 0 50px yellow;
+    }
+    @keyframes neonPulse {
+      0% { box-shadow: 0 0 20px hotpink, 0 0 40px crimson; }
+      100% { box-shadow: 0 0 50px magenta, 0 0 100px hotpink; }
+    }
+    footer {
+      margin-top: 60px;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+    footer a {
+      color: #ff8edb;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>💀 BrownDogGames Arcade 💀</h1>
+  <p>Welcome to the BrownDogGames Arcade! Ready to spin the Wheel of Shame and face hilarious dares? Click below to begin your wild ride!</p>
+  <a class="button" href="wheel-of-shame.html" target="_blank">PLAY WHEEL OF SHAME</a>
+  <footer>
+    Created by Twinkle756 • <a href="https://github.com/twinkle756/Star" target="_blank">Source on GitHub</a>
+  </footer>
+</body>
+</html>
