@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8" />
+  <title>💀 WHEEL OF SHAME: CLEAN & CLEAR 💀</title>
+  <style>
+    body {
+      background-color: #000;
+      color: white;
+      font-family: "Comic Sans MS", cursive, sans-serif;
+      text-align: center;
+      padding: 60px 20px;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    h1 {
+      font-size: 60px;
+      color: magenta;
+      text-shadow:
+        0 0 10px #ff00ff,
+        0 0 20px #ff00ff,
+        0 0 30px #ff00ff;
+      margin-bottom: 10px;
+      user-select: none;
+    }
+
+    #pointer {
+      font-size: 48px;
+      color: #ff0055;
+      text-shadow: 0 0 10px #ff0055;
+      animation: wiggle 1.2s ease-in-out infinite;
+      margin-bottom: -20px;
+      user-select: none;
+    }
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(5deg); }
+    }
+
+    #wheel {
+      width: 300px;
+      height: 300px;
+      margin: 0 auto;
+      border-radius: 50%;
+      border: 15px double hotpink;
+      box-shadow:
+        0 0 40px magenta,
+        inset 0 0 20px #ff00ff;
+      background: conic-gradient(
+        #ff0000 0deg 45deg,
+        #ffff00 45deg 90deg,
+        #32cd32 90deg 135deg,
+        #00ffff 135deg 180deg,
+        #ff8c00 180deg 225deg,
+        #ff69b4 225deg 270deg,
+        #8a2be2 270deg 315deg,
+        #ffffff 315deg 360deg
+      );
+      transition: transform 4s cubic-bezier(0.3, 1.5, 0.5, 1);
+      position: relative;
+      user-select: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    #spinBtn {
+      margin-top: 40px;
+      padding: 25px 60px;
+      font-size: 30px;
+      font-weight: 900;
+      background: linear-gradient(45deg, crimson, hotpink);
+      color: white;
+      border: 5px dashed yellow;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow:
+        0 0 20px hotpink,
+        0 0 40px crimson,
+        0 0 60px magenta;
+      animation: neonPulse 2s ease-in-out infinite alternate;
+      user-select: none;
+      transition: transform 0.1s ease;
+      position: relative;
+      z-index: 20;
+    }
+    #spinBtn:active {
+      transform: scale(0.9) rotate(-5deg);
+      box-shadow: 0 0 50px yellow;
+    }
+    @keyframes neonPulse {
+      0% { box-shadow: 0 0 20px hotpink, 0 0 40px crimson; }
+      100% { box-shadow: 0 0 50px magenta, 0 0 100px hotpink; }
+    }
+
+    #result {
+      margin-top: 50px;
+      font-size: 36px;
+      color: #ff69b4;
+      min-height: 100px;
+      font-weight: 900;
+      text-shadow:
+        0 0 10px #ff69b4,
+        0 0 30px #ff1493;
+      animation: pulseText 1s ease-in-out infinite alternate;
+      user-select: none;
+    }
+    @keyframes pulseText {
+      from { text-shadow: 0 0 10px #ff69b4; }
+      to { text-shadow: 0 0 30px #ff1493; }
+    }
+
+    .confetti {
+      position: fixed;
+      font-size: 30px;
+      animation: fall 3s linear forwards;
+      user-select: none;
+      pointer-events: none;
+      filter: drop-shadow(0 0 3px #fff);
+      z-index: 9999;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>💀 WHEEL OF SHAME 💀</h1>
+  <div id="pointer" aria-hidden="true">🔻</div>
+  <div id="wheel" aria-label="Wheel of Shame"></div>
+  <button id="spinBtn" aria-label="Spin the Wheel or Suffer">SPIN OR SUFFER</button>
+  <div id="result" aria-live="polite"></div>
+
+  <audio id="sound1" src="https://www.myinstants.com/media/sounds/fart-with-reverb.mp3" preload="auto"></audio>
+  <audio id="sound2" src="https://www.myinstants.com/media/sounds/vine-boom.mp3" preload="auto"></audio>
+  <audio id="sound3" src="https://www.myinstants.com/media/sounds/wilhelm-scream.mp3" preload="auto"></audio>
+
+  <script>
+    const dares = [
+      "🐸 Lick your elbow while making frog noises.",
+      "👃 Sniff someone’s shoe and rate it out of 10.",
+      "🕺 Twerk like no one's watching... but everyone's watching.",
+      "📱 Text your crush: 'Do you believe in lizard people?'",
+      "🧻 Wrap yourself in toilet paper and scream 'Mummy’s home!'",
+      "🦶 Do a toe dance. No feet? Improvise.",
+      "🐓 Cluck like a chicken until someone joins you.",
+      "📣 Shout 'I PEAKED IN MIDDLE SCHOOL' and do a power pose."
+    ];
+
+    const sounds = [
+      document.getElementById("sound1"),
+      document.getElementById("sound2"),
+      document.getElementById("sound3")
+    ];
+
+    const wheel = document.getElementById("wheel");
+    const result = document.getElementById("result");
+    const spinBtn = document.getElementById("spinBtn");
+
+    let currentAngle = 0;
+    let spinning = false;
+
+    function createConfetti() {
+      const emojis = ["🎉", "💥", "😂", "💩", "🤪", "🔥", "👻"];
+      for (let i = 0; i < 50; i++) {
+        const el = document.createElement("div");
+        el.className = "confetti";
+        el.style.left = Math.random() * window.innerWidth + "px";
+        el.style.top = Math.random() * -100 + "px";
+        el.style.fontSize = (20 + Math.random() * 20) + "px";
+        el.style.animationDuration = (2 + Math.random() * 2) + "s";
+        el.style.animationDelay = (Math.random() * 1.5) + "s";
+        el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }
+    }
+
+    spinBtn.addEventListener("click", () => {
+      if (spinning) return;
+      spinning = true;
+
+      result.innerText = "";
+      spinBtn.disabled = true;
+      spinBtn.style.cursor = "not-allowed";
+
+      const spins = 6 + Math.floor(Math.random() * 4);
+      const extraRotation = Math.floor(Math.random() * 360);
+      const totalRotation = spins * 360 + extraRotation;
+
+      currentAngle += totalRotation;
+
+      wheel.style.transition = "transform 4s cubic-bezier(0.3, 1.5, 0.5, 1)";
+      wheel.style.transform = `rotate(${currentAngle}deg)`;
+
+      createConfetti();
+
+      setTimeout(() => {
+        const normalizedAngle = currentAngle % 360;
+        const segmentAngle = 360 / dares.length;
+        let index = Math.floor((360 - normalizedAngle + segmentAngle / 2) / segmentAngle) % dares.length;
+        if (index < 0) index += dares.length;
+
+        const dare = dares[index];
+        const sound = sounds[Math.floor(Math.random() * sounds.length)];
+
+        result.innerHTML = `<span style="display:inline-block; animation: pop 0.5s ease forwards;">💥 Dare: ${dare}</span>`;
+        sound.volume = 0.9;
+        sound.play();
+
+        createConfetti();
+
+        spinning = false;
+        spinBtn.disabled = false;
+        spinBtn.style.cursor = "pointer";
+      }, 4200);
+    });
+
+    // Pop animation for result text
+    const styleSheet = document.createElement("style");
+    styleSheet.innerText = `
+      @keyframes pop {
+        0% {
+          transform: scale(0.5);
+          opacity: 0;
+          filter: drop-shadow(0 0 5px magenta);
+        }
+        60% {
+          transform: scale(1.2);
+          opacity: 1;
+          filter: drop-shadow(0 0 20px magenta);
+        }
+        100% {
+          transform: scale(1);
+          filter: drop-shadow(0 0 10px magenta);
+        }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+  </script>
+
+</body>
+</html>
