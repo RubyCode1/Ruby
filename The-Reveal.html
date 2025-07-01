@@ -31,35 +31,45 @@
     margin-bottom: 10px;
   }
 
-  .leg {
+  /* The links are the moving blocks */
+  #leftLegLink, #rightLegLink {
     position: absolute;
     top: 0;
     width: 50vw;
     height: 100vh;
-    object-fit: contain;
-    filter: brightness(0.85) saturate(1.4);
-    opacity: 0;
-    transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
     z-index: 3;
     cursor: pointer;
+    filter: brightness(0.85) saturate(1.4);
+    transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: subtlePulse 4s ease-in-out infinite;
   }
-  .leg:hover {
+  #rightLegLink {
+    animation-delay: 2s;
+  }
+  #leftLegLink:hover, #rightLegLink:hover {
     filter: brightness(1.1) saturate(1.6);
-    transform: scale(1.05) scaleX(var(--flip));
+    transform: scale(1.05);
     transition: all 0.4s ease;
   }
 
-  #leftLeg {
+  #leftLegLink {
     left: -50vw;
-    --flip: -1;
+    transform-origin: center;
     transform: scaleX(-1);
-    animation: subtlePulse 4s ease-in-out infinite;
   }
 
-  #rightLeg {
+  #rightLegLink {
     right: -50vw;
-    --flip: 1;
-    animation: subtlePulse 4s ease-in-out infinite 2s;
+  }
+
+  /* Images fill their parent links and do not capture pointer events */
+  #leftLegLink img, #rightLegLink img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
   }
 
   #revealItem {
@@ -67,7 +77,7 @@
     top: 52%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 2;
+    z-index: 4;
     font-size: 3em;
     font-weight: 900;
     letter-spacing: 1.5px;
@@ -83,7 +93,6 @@
 
   .visible {
     opacity: 1;
-    pointer-events: auto;
     animation: pulseText 2.5s infinite;
   }
 
@@ -103,11 +112,11 @@
   @keyframes subtlePulse {
     0%, 100% {
       filter: brightness(0.85) saturate(1.4);
-      transform: scale(1) scaleX(var(--flip));
+      transform: scale(1) scaleX(var(--flip, 1));
     }
     50% {
       filter: brightness(1) saturate(1.6);
-      transform: scale(1.03) scaleX(var(--flip));
+      transform: scale(1.03) scaleX(var(--flip, 1));
     }
   }
 
@@ -181,10 +190,10 @@
 
 <div id="gameContainer">
   <a id="leftLegLink" href="https://i.imgur.com/2PhbDdZ.png" target="_blank" title="Open Left Leg Image">
-    <img id="leftLeg" class="leg" src="https://i.imgur.com/2PhbDdZ.png" alt="Left Leg" />
+    <img id="leftLeg" src="https://i.imgur.com/2PhbDdZ.png" alt="Left Leg" />
   </a>
   <a id="rightLegLink" href="https://i.imgur.com/UqN0hZo.png" target="_blank" title="Open Right Leg Image">
-    <img id="rightLeg" class="leg" src="https://i.imgur.com/UqN0hZo.png" alt="Right Leg" />
+    <img id="rightLeg" src="https://i.imgur.com/UqN0hZo.png" alt="Right Leg" />
   </a>
   <div id="revealItem">🔥 Hot & Ready 🔥</div>
   <audio id="revealSound" preload="auto"></audio>
@@ -230,8 +239,10 @@
 </div>
 
 <script>
-  const leftLeg = document.getElementById("leftLeg");
-  const rightLeg = document.getElementById("rightLeg");
+  const leftLegLink = document.getElementById("leftLegLink");
+  const rightLegLink = document.getElementById("rightLegLink");
+  const leftLegImg = document.getElementById("leftLeg");
+  const rightLegImg = document.getElementById("rightLeg");
   const revealItem = document.getElementById("revealItem");
   const revealSound = document.getElementById("revealSound");
   const ambientSound = document.getElementById("ambientSound");
@@ -241,18 +252,15 @@
   const rightLegSelect = document.getElementById("rightLegSelect");
   const soundSelect = document.getElementById("soundSelect");
 
-  const leftLegLink = document.getElementById("leftLegLink");
-  const rightLegLink = document.getElementById("rightLegLink");
-
   const leftLegCurrentLink = document.getElementById("leftLegCurrentLink");
   const rightLegCurrentLink = document.getElementById("rightLegCurrentLink");
   const revealSoundCurrentLink = document.getElementById("revealSoundCurrentLink");
 
   function reset() {
-    leftLeg.style.left = "-50vw";
-    leftLeg.style.opacity = "0";
-    rightLeg.style.right = "-50vw";
-    rightLeg.style.opacity = "0";
+    leftLegLink.style.left = "-50vw";
+    leftLegLink.style.opacity = "0";
+    rightLegLink.style.right = "-50vw";
+    rightLegLink.style.opacity = "0";
     revealItem.classList.remove("visible");
     revealItem.style.opacity = "0";
 
@@ -270,8 +278,8 @@
     ambientSound.play();
 
     // Update image sources & their link hrefs
-    leftLeg.src = leftLegSelect.value;
-    rightLeg.src = rightLegSelect.value;
+    leftLegImg.src = leftLegSelect.value;
+    rightLegImg.src = rightLegSelect.value;
     leftLegLink.href = leftLegSelect.value;
     rightLegLink.href = rightLegSelect.value;
     leftLegCurrentLink.href = leftLegSelect.value;
@@ -282,38 +290,26 @@
     revealSoundCurrentLink.href = soundSelect.value;
 
     setTimeout(() => {
-      leftLeg.style.opacity = "1";
-      rightLeg.style.opacity = "1";
-      leftLeg.style.left = "0";
-      rightLeg.style.right = "0";
-    }, 100);
+      leftLegLink.style.opacity = "1";
+      rightLegLink.style.opacity = "1";
+      leftLegLink.style.left = "0";
+      rightLegLink.style.right = "0";
+    }, 250);
 
     setTimeout(() => {
-      leftLeg.style.left = "-50vw";
-      rightLeg.style.right = "-50vw";
-    }, 4500);
-
-    setTimeout(() => {
-      revealItem.classList.add("visible");
-      revealSound.volume = 0.6;
       revealSound.play();
-    }, 6000);
+      revealItem.classList.add("visible");
+    }, 1700);
+
+    setTimeout(() => {
+      ambientSound.pause();
+    }, 8000);
   }
 
   replayBtn.addEventListener("click", startAnimation);
-
-  // Update preview links live if user changes selects without replaying yet
-  leftLegSelect.addEventListener("change", () => {
-    leftLegCurrentLink.href = leftLegSelect.value;
-    leftLegLink.href = leftLegSelect.value;
-  });
-  rightLegSelect.addEventListener("change", () => {
-    rightLegCurrentLink.href = rightLegSelect.value;
-    rightLegLink.href = rightLegSelect.value;
-  });
-  soundSelect.addEventListener("change", () => {
-    revealSoundCurrentLink.href = soundSelect.value;
-  });
+  leftLegSelect.addEventListener("change", startAnimation);
+  rightLegSelect.addEventListener("change", startAnimation);
+  soundSelect.addEventListener("change", startAnimation);
 
   window.onload = startAnimation;
 </script>
