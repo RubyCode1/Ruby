@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Sensual Reveal - NSFW Vibe</title>
+<title>Sensual Reveal - Customizable with Links</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
@@ -11,6 +11,7 @@
     overflow: hidden;
     background: radial-gradient(circle at center, #1a0000 30%, #000000 100%);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -23,10 +24,11 @@
   #gameContainer {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 80vh;
     overflow: hidden;
     box-shadow: 0 0 60px 10px #ff0077cc inset;
     background: radial-gradient(circle at center, #2a00003b 40%, transparent 70%);
+    margin-bottom: 10px;
   }
 
   .leg {
@@ -110,12 +112,9 @@
   }
 
   #replayBtn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
     background: #ff0055cc;
     border: none;
-    padding: 14px 22px;
+    padding: 12px 20px;
     font-size: 1.1em;
     font-weight: 900;
     color: white;
@@ -125,30 +124,110 @@
     user-select: none;
     opacity: 0.9;
     transition: opacity 0.3s ease;
-    z-index: 20;
     font-family: 'Georgia', serif;
+    margin-right: 10px;
   }
-  #replayBtn:hover {
+  #replayBtn:hover, #replayBtn:focus {
     opacity: 1;
+    outline: none;
+    box-shadow: 0 0 30px 3px #ff66aa;
+  }
+
+  #controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  select {
+    font-size: 1em;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid #ff0077cc;
+    background: #1a0000;
+    color: #fce4ec;
+    font-family: 'Georgia', serif;
+    cursor: pointer;
+  }
+  select:focus {
+    outline: none;
+    box-shadow: 0 0 10px 2px #ff66aa;
+  }
+
+  /* Link containers below the reveal */
+  #linksContainer {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    color: #ff99bb;
+    font-family: 'Georgia', serif;
+    font-size: 0.95em;
+  }
+  #linksContainer a {
+    color: #ff99bb;
+    text-decoration: none;
+    border-bottom: 1px dotted transparent;
+  }
+  #linksContainer a:hover, #linksContainer a:focus {
+    border-bottom: 1px dotted #ff66aa;
+    outline: none;
   }
 </style>
 </head>
 <body>
 
 <div id="gameContainer">
-  <!-- Improved sexy leg images: stockings + heels, transparent PNGs -->
-  <img id="leftLeg" class="leg" src="https://i.imgur.com/2PhbDdZ.png" alt="Left Leg" />
-  <img id="rightLeg" class="leg" src="https://i.imgur.com/UqN0hZo.png" alt="Right Leg" />
+  <a id="leftLegLink" href="https://i.imgur.com/2PhbDdZ.png" target="_blank" title="Open Left Leg Image">
+    <img id="leftLeg" class="leg" src="https://i.imgur.com/2PhbDdZ.png" alt="Left Leg" />
+  </a>
+  <a id="rightLegLink" href="https://i.imgur.com/UqN0hZo.png" target="_blank" title="Open Right Leg Image">
+    <img id="rightLeg" class="leg" src="https://i.imgur.com/UqN0hZo.png" alt="Right Leg" />
+  </a>
   <div id="revealItem">🔥 Hot & Ready 🔥</div>
-  
-  <!-- Better reveal sound -->
-  <audio id="revealSound" src="https://cdn.freesound.org/previews/631/631741_1648170-lq.mp3" preload="auto"></audio>
-  
-  <!-- Sexy ambient smooth lounge jazz -->
-  <audio id="ambientSound" src="https://cdn.freesound.org/previews/525/525280_8386271-lq.mp3" preload="auto" loop></audio>
+  <audio id="revealSound" preload="auto"></audio>
+  <audio id="ambientSound" preload="auto" loop></audio>
 </div>
 
-<button id="replayBtn" title="Replay Animation">Replay</button>
+<div id="controls">
+  <label>
+    Left Leg:
+    <select id="leftLegSelect" aria-label="Select Left Leg Image">
+      <option value="https://i.imgur.com/2PhbDdZ.png">Classic Pink Heels</option>
+      <option value="https://i.imgur.com/GD6GfPk.png">Silky Legs</option>
+      <option value="https://i.imgur.com/RMBeVdf.png">High Heel Elegance</option>
+    </select>
+  </label>
+
+  <label>
+    Right Leg:
+    <select id="rightLegSelect" aria-label="Select Right Leg Image">
+      <option value="https://i.imgur.com/UqN0hZo.png">Classic Pink Heels</option>
+      <option value="https://i.imgur.com/GD6GfPk.png">Silky Legs</option>
+      <option value="https://i.imgur.com/RMBeVdf.png">High Heel Elegance</option>
+    </select>
+  </label>
+
+  <label>
+    Reveal Sound:
+    <select id="soundSelect" aria-label="Select Reveal Sound">
+      <option value="https://cdn.freesound.org/previews/631/631741_1648170-lq.mp3">Magic Sparkle</option>
+      <option value="https://assets.mixkit.co/sfx/preview/mixkit-magic-potion-bottle-3707.mp3">Potion Pop</option>
+      <option value="https://assets.mixkit.co/sfx/preview/mixkit-mystical-bell-1087.mp3">Mystic Bell</option>
+    </select>
+  </label>
+
+  <button id="replayBtn" title="Replay Animation">Replay</button>
+</div>
+
+<!-- Links showing current selected URLs -->
+<div id="linksContainer" aria-live="polite" aria-atomic="true">
+  <a id="leftLegCurrentLink" href="https://i.imgur.com/2PhbDdZ.png" target="_blank" title="Open Left Leg Image">Left Leg Image</a>
+  <a id="rightLegCurrentLink" href="https://i.imgur.com/UqN0hZo.png" target="_blank" title="Open Right Leg Image">Right Leg Image</a>
+  <a id="revealSoundCurrentLink" href="https://cdn.freesound.org/previews/631/631741_1648170-lq.mp3" target="_blank" title="Play Reveal Sound">Reveal Sound</a>
+</div>
 
 <script>
   const leftLeg = document.getElementById("leftLeg");
@@ -157,6 +236,17 @@
   const revealSound = document.getElementById("revealSound");
   const ambientSound = document.getElementById("ambientSound");
   const replayBtn = document.getElementById("replayBtn");
+
+  const leftLegSelect = document.getElementById("leftLegSelect");
+  const rightLegSelect = document.getElementById("rightLegSelect");
+  const soundSelect = document.getElementById("soundSelect");
+
+  const leftLegLink = document.getElementById("leftLegLink");
+  const rightLegLink = document.getElementById("rightLegLink");
+
+  const leftLegCurrentLink = document.getElementById("leftLegCurrentLink");
+  const rightLegCurrentLink = document.getElementById("rightLegCurrentLink");
+  const revealSoundCurrentLink = document.getElementById("revealSoundCurrentLink");
 
   function reset() {
     leftLeg.style.left = "-50vw";
@@ -175,11 +265,22 @@
   function startAnimation() {
     reset();
 
-    // Play ambient background sound gently
     ambientSound.volume = 0.15;
+    ambientSound.src = "https://cdn.freesound.org/previews/525/525280_8386271-lq.mp3"; // ambient loop
     ambientSound.play();
 
-    // Legs fade and slide in
+    // Update image sources & their link hrefs
+    leftLeg.src = leftLegSelect.value;
+    rightLeg.src = rightLegSelect.value;
+    leftLegLink.href = leftLegSelect.value;
+    rightLegLink.href = rightLegSelect.value;
+    leftLegCurrentLink.href = leftLegSelect.value;
+    rightLegCurrentLink.href = rightLegSelect.value;
+
+    // Update reveal sound src & link
+    revealSound.src = soundSelect.value;
+    revealSoundCurrentLink.href = soundSelect.value;
+
     setTimeout(() => {
       leftLeg.style.opacity = "1";
       rightLeg.style.opacity = "1";
@@ -187,13 +288,11 @@
       rightLeg.style.right = "0";
     }, 100);
 
-    // Legs slide back out
     setTimeout(() => {
       leftLeg.style.left = "-50vw";
       rightLeg.style.right = "-50vw";
     }, 4500);
 
-    // Reveal text and play reveal sound
     setTimeout(() => {
       revealItem.classList.add("visible");
       revealSound.volume = 0.6;
@@ -203,7 +302,19 @@
 
   replayBtn.addEventListener("click", startAnimation);
 
-  // Start on page load
+  // Update preview links live if user changes selects without replaying yet
+  leftLegSelect.addEventListener("change", () => {
+    leftLegCurrentLink.href = leftLegSelect.value;
+    leftLegLink.href = leftLegSelect.value;
+  });
+  rightLegSelect.addEventListener("change", () => {
+    rightLegCurrentLink.href = rightLegSelect.value;
+    rightLegLink.href = rightLegSelect.value;
+  });
+  soundSelect.addEventListener("change", () => {
+    revealSoundCurrentLink.href = soundSelect.value;
+  });
+
   window.onload = startAnimation;
 </script>
 
