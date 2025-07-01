@@ -1,100 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sensual Reveal</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: radial-gradient(#000 40%, #1a1a1a 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      font-family: 'Georgia', serif;
-    }
+<meta charset="UTF-8" />
+<title>Sensual Reveal - NSFW Vibe</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-    #gameContainer {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: radial-gradient(circle at center, #1a0000 30%, #000000 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: 'Georgia', serif;
+    color: #fce4ec;
+    user-select: none;
+    position: relative;
+  }
 
-    .leg {
-      position: absolute;
-      top: 0;
-      width: 50vw;
-      height: 100vh;
-      object-fit: cover;
-      transition: all 2.5s ease-in-out;
-      z-index: 2;
-      filter: brightness(0.9) saturate(1.2);
-    }
+  #gameContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    box-shadow: 0 0 60px 10px #ff0077cc inset;
+    background: radial-gradient(circle at center, #2a00003b 40%, transparent 70%);
+  }
 
-    #leftLeg {
-      left: -50vw;
-      transform: scaleX(-1);
-    }
+  .leg {
+    position: absolute;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
+    object-fit: contain;
+    filter: brightness(0.85) saturate(1.4);
+    opacity: 0;
+    transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 3;
+    cursor: pointer;
+  }
+  .leg:hover {
+    filter: brightness(1.1) saturate(1.6);
+    transform: scale(1.05) scaleX(var(--flip));
+    transition: all 0.4s ease;
+  }
 
-    #rightLeg {
-      right: -50vw;
-    }
+  #leftLeg {
+    left: -50vw;
+    --flip: -1;
+    transform: scaleX(-1);
+    animation: subtlePulse 4s ease-in-out infinite;
+  }
 
-    #revealItem {
-      position: absolute;
-      top: 52%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 1;
-      font-size: 2.8em;
-      color: #fce4ec;
-      font-weight: bold;
-      letter-spacing: 1px;
-      opacity: 0;
-      transition: opacity 1s ease;
-      text-shadow: 0 0 10px #ff69b4;
-    }
+  #rightLeg {
+    right: -50vw;
+    --flip: 1;
+    animation: subtlePulse 4s ease-in-out infinite 2s;
+  }
 
-    .visible {
-      opacity: 1;
+  #revealItem {
+    position: absolute;
+    top: 52%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    font-size: 3em;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    opacity: 0;
+    transition: opacity 1s ease;
+    text-shadow:
+      0 0 15px #ff0077cc,
+      0 0 35px #ff0077cc;
+    font-family: 'Great Vibes', cursive;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .visible {
+    opacity: 1;
+    pointer-events: auto;
+    animation: pulseText 2.5s infinite;
+  }
+
+  @keyframes pulseText {
+    0%, 100% {
+      text-shadow:
+        0 0 15px #ff3399cc,
+        0 0 40px #ff0077cc;
     }
-  </style>
+    50% {
+      text-shadow:
+        0 0 35px #ff33aacc,
+        0 0 60px #ff0077cc;
+    }
+  }
+
+  @keyframes subtlePulse {
+    0%, 100% {
+      filter: brightness(0.85) saturate(1.4);
+      transform: scale(1) scaleX(var(--flip));
+    }
+    50% {
+      filter: brightness(1) saturate(1.6);
+      transform: scale(1.03) scaleX(var(--flip));
+    }
+  }
+
+  #replayBtn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: #ff0055cc;
+    border: none;
+    padding: 14px 22px;
+    font-size: 1.1em;
+    font-weight: 900;
+    color: white;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 0 20px #ff0077cc;
+    user-select: none;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+    z-index: 20;
+    font-family: 'Georgia', serif;
+  }
+  #replayBtn:hover {
+    opacity: 1;
+  }
+</style>
 </head>
 <body>
 
 <div id="gameContainer">
-  <!-- Replace with your sensual PNGs -->
-  <img id="leftLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Left Leg">
-  <img id="rightLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Right Leg">
-  <div id="revealItem">💋 Just for You</div>
-  <audio id="revealSound" src="https://assets.mixkit.co/sfx/preview/mixkit-magical-appearance-342.wav"></audio>
+  <!-- Improved sexy leg images: stockings + heels, transparent PNGs -->
+  <img id="leftLeg" class="leg" src="https://i.imgur.com/2PhbDdZ.png" alt="Left Leg" />
+  <img id="rightLeg" class="leg" src="https://i.imgur.com/UqN0hZo.png" alt="Right Leg" />
+  <div id="revealItem">🔥 Hot & Ready 🔥</div>
+  
+  <!-- Better reveal sound -->
+  <audio id="revealSound" src="https://cdn.freesound.org/previews/631/631741_1648170-lq.mp3" preload="auto"></audio>
+  
+  <!-- Sexy ambient smooth lounge jazz -->
+  <audio id="ambientSound" src="https://cdn.freesound.org/previews/525/525280_8386271-lq.mp3" preload="auto" loop></audio>
 </div>
+
+<button id="replayBtn" title="Replay Animation">Replay</button>
 
 <script>
   const leftLeg = document.getElementById("leftLeg");
   const rightLeg = document.getElementById("rightLeg");
   const revealItem = document.getElementById("revealItem");
-  const sound = document.getElementById("revealSound");
+  const revealSound = document.getElementById("revealSound");
+  const ambientSound = document.getElementById("ambientSound");
+  const replayBtn = document.getElementById("replayBtn");
 
-  // Slide in
-  setTimeout(() => {
-    leftLeg.style.left = "0";
-    rightLeg.style.right = "0";
-  }, 1000);
-
-  // Pause and slide out
-  setTimeout(() => {
+  function reset() {
     leftLeg.style.left = "-50vw";
+    leftLeg.style.opacity = "0";
     rightLeg.style.right = "-50vw";
-  }, 4500);
+    rightLeg.style.opacity = "0";
+    revealItem.classList.remove("visible");
+    revealItem.style.opacity = "0";
 
-  // Reveal and play sound
-  setTimeout(() => {
-    revealItem.classList.add("visible");
-    sound.play();
-  }, 6000);
+    revealSound.pause();
+    revealSound.currentTime = 0;
+
+    ambientSound.pause();
+  }
+
+  function startAnimation() {
+    reset();
+
+    // Play ambient background sound gently
+    ambientSound.volume = 0.15;
+    ambientSound.play();
+
+    // Legs fade and slide in
+    setTimeout(() => {
+      leftLeg.style.opacity = "1";
+      rightLeg.style.opacity = "1";
+      leftLeg.style.left = "0";
+      rightLeg.style.right = "0";
+    }, 100);
+
+    // Legs slide back out
+    setTimeout(() => {
+      leftLeg.style.left = "-50vw";
+      rightLeg.style.right = "-50vw";
+    }, 4500);
+
+    // Reveal text and play reveal sound
+    setTimeout(() => {
+      revealItem.classList.add("visible");
+      revealSound.volume = 0.6;
+      revealSound.play();
+    }, 6000);
+  }
+
+  replayBtn.addEventListener("click", startAnimation);
+
+  // Start on page load
+  window.onload = startAnimation;
 </script>
 
 </body>
