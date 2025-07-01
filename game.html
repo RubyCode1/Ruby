@@ -13,36 +13,50 @@
       justify-content: center;
       align-items: center;
       height: 100vh;
+      flex-direction: column;
     }
+
     canvas {
       display: none;
       background: #222;
       border: 2px solid #fff;
-      touch-action: none; /* Prevent default touch behaviors */
     }
-    #startBtn {
-      font-size: 24px;
-      padding: 20px 40px;
+
+    #startBtn, #jumpBtn {
+      font-size: 20px;
+      padding: 16px 32px;
       background-color: hotpink;
       color: white;
       border: none;
       border-radius: 12px;
       cursor: pointer;
       transition: background-color 0.3s;
+      margin: 10px;
     }
-    #startBtn:hover {
+
+    #startBtn:hover, #jumpBtn:hover {
       background-color: deeppink;
+    }
+
+    #jumpBtn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      display: none;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
   <button id="startBtn">Start Diana's Naughty Dash</button>
   <canvas id="game" width="800" height="400"></canvas>
+  <button id="jumpBtn">Jump</button>
 
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const startBtn = document.getElementById("startBtn");
+    const jumpBtn = document.getElementById("jumpBtn");
 
     const dianaImg = new Image();
     dianaImg.src = "diana.png";
@@ -93,25 +107,7 @@
       return list[Math.floor(Math.random() * list.length)];
     }
 
-    window.addEventListener("keydown", (e) => {
-      keys[e.key] = true;
-      if ((e.key === " " || e.key === "ArrowUp") && !player.jumping) {
-        player.dy = -12;
-        player.jumping = true;
-        score++;
-        if (score > highScore) highScore = score;
-        jumpSound.currentTime = 0;
-        jumpSound.play();
-        showSpeech(getRandomMessage(jumpMessages), 60);
-      }
-    });
-
-    window.addEventListener("keyup", (e) => keys[e.key] = false);
-
-    // Mobile tap to jump
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault(); // Prevent scrolling on tap
-
+    function triggerJump() {
       if (!player.jumping) {
         player.dy = -12;
         player.jumping = true;
@@ -121,6 +117,20 @@
         jumpSound.play();
         showSpeech(getRandomMessage(jumpMessages), 60);
       }
+    }
+
+    window.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+      if (e.key === " " || e.key === "ArrowUp") triggerJump();
+    });
+
+    window.addEventListener("keyup", (e) => keys[e.key] = false);
+
+    // ✅ FIX: Working jump button on both mobile and desktop
+    jumpBtn.addEventListener("click", triggerJump);
+    jumpBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      triggerJump();
     }, { passive: false });
 
     function drawBackground() {
@@ -146,18 +156,17 @@
 
     function drawSpeechBubble(text, x, y) {
       ctx.font = "14px 'Segoe UI'";
-      const paddingX = 15;
-      const paddingY = 10;
-      const maxWidth = 200;
+      const paddingX = 10;
+      const paddingY = 8;
+      const maxTextWidth = 180;
       const words = text.split(" ");
       const lines = [];
       let currentLine = words[0];
 
-      // Proper line wrapping within maxWidth
       for (let i = 1; i < words.length; i++) {
         const word = words[i];
         const width = ctx.measureText(currentLine + " " + word).width;
-        if (width < maxWidth) {
+        if (width < maxTextWidth) {
           currentLine += " " + word;
         } else {
           lines.push(currentLine);
@@ -167,38 +176,29 @@
       lines.push(currentLine);
 
       const lineHeight = 18;
-      const bubbleWidth = maxWidth + paddingX * 2;
+      const textWidth = maxTextWidth;
+      const bubbleWidth = textWidth + paddingX * 2;
       const bubbleHeight = lines.length * lineHeight + paddingY * 2;
 
-      // Position bubble so it never goes off canvas right edge
-      let bubbleX = x - bubbleWidth / 2;
-      if (bubbleX < 5) bubbleX = 5;
-      if (bubbleX + bubbleWidth > canvas.width - 5) bubbleX = canvas.width - bubbleWidth - 5;
+      const bubbleX = x - 10;
+      const bubbleY = y - bubbleHeight - 20;
 
-      let bubbleY = y - bubbleHeight - 30;
-      if (bubbleY < 5) bubbleY = y + 30; // if too close to top, put below player
-
-      // Draw bubble rectangle with rounded corners
-      ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 2;
-      roundRect(ctx, bubbleX, bubbleY, bubbleWidth, bubbleHeight, 12);
+      roundRect(ctx, bubbleX, bubbleY, bubbleWidth, bubbleHeight, 10);
 
-      // Draw the little pointer/arrow below bubble center
       ctx.beginPath();
-      const pointerX = x;
-      const pointerY = bubbleY + bubbleHeight;
-      ctx.moveTo(pointerX - 15, pointerY);
-      ctx.lineTo(pointerX, pointerY + 15);
-      ctx.lineTo(pointerX + 15, pointerY);
+      ctx.moveTo(bubbleX + 40, bubbleY + bubbleHeight);
+      ctx.lineTo(bubbleX + 50, bubbleY + bubbleHeight + 12);
+      ctx.lineTo(bubbleX + 60, bubbleY + bubbleHeight);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // Draw text lines inside bubble
       ctx.fillStyle = "#222";
-      ctx.textBaseline = "top";
       ctx.textAlign = "left";
+      ctx.textBaseline = "top";
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], bubbleX + paddingX, bubbleY + paddingY + i * lineHeight);
       }
@@ -207,8 +207,7 @@
     function drawPlayer() {
       ctx.drawImage(dianaImg, player.x, player.y, player.width, player.height);
       if (speech.timer > 0 && speech.text) {
-        // Put bubble centered horizontally above player
-        drawSpeechBubble(speech.text, player.x + player.width / 2, player.y);
+        drawSpeechBubble(speech.text, player.x, player.y);
       }
     }
 
@@ -280,6 +279,7 @@
 
     function startGame() {
       startBtn.style.display = "none";
+      jumpBtn.style.display = "block";
       canvas.style.display = "block";
       bgMusic.play();
       resetGame();
