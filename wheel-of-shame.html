@@ -9,28 +9,28 @@
       color: white;
       font-family: "Comic Sans MS", cursive, sans-serif;
       text-align: center;
-      padding: 60px 20px;
+      padding: 30px 10px;
       overflow: hidden;
       user-select: none;
     }
 
     h1 {
-      font-size: 60px;
+      font-size: 36px;
       color: magenta;
       text-shadow:
-        0 0 10px #ff00ff,
-        0 0 20px #ff00ff,
-        0 0 30px #ff00ff;
-      margin-bottom: 10px;
+        0 0 6px #ff00ff,
+        0 0 12px #ff00ff,
+        0 0 18px #ff00ff;
+      margin-bottom: 8px;
       user-select: none;
     }
 
     #pointer {
-      font-size: 48px;
+      font-size: 28px;
       color: #ff0055;
-      text-shadow: 0 0 10px #ff0055;
+      text-shadow: 0 0 6px #ff0055;
       animation: wiggle 1.2s ease-in-out infinite;
-      margin-bottom: -20px;
+      margin-bottom: -15px;
       user-select: none;
     }
     @keyframes wiggle {
@@ -41,14 +41,14 @@
     }
 
     #wheel {
-      width: 300px;
-      height: 300px;
+      width: 200px;
+      height: 200px;
       margin: 0 auto;
       border-radius: 50%;
-      border: 15px double hotpink;
+      border: 10px double hotpink;
       box-shadow:
-        0 0 40px magenta,
-        inset 0 0 20px #ff00ff;
+        0 0 25px magenta,
+        inset 0 0 15px #ff00ff;
       background: conic-gradient(
         #ff0000 0deg 45deg,
         #ffff00 45deg 90deg,
@@ -63,23 +63,23 @@
       position: relative;
       user-select: none;
       font-weight: bold;
-      font-size: 14px;
+      font-size: 12px;
     }
 
     #spinBtn {
-      margin-top: 40px;
-      padding: 25px 60px;
-      font-size: 30px;
+      margin-top: 30px;
+      padding: 15px 40px;
+      font-size: 22px;
       font-weight: 900;
       background: linear-gradient(45deg, crimson, hotpink);
       color: white;
-      border: 5px dashed yellow;
-      border-radius: 30px;
+      border: 4px dashed yellow;
+      border-radius: 25px;
       cursor: pointer;
       box-shadow:
-        0 0 20px hotpink,
-        0 0 40px crimson,
-        0 0 60px magenta;
+        0 0 15px hotpink,
+        0 0 30px crimson,
+        0 0 40px magenta;
       animation: neonPulse 2s ease-in-out infinite alternate;
       user-select: none;
       transition: transform 0.1s ease;
@@ -88,37 +88,38 @@
     }
     #spinBtn:active {
       transform: scale(0.9) rotate(-5deg);
-      box-shadow: 0 0 50px yellow;
+      box-shadow: 0 0 40px yellow;
     }
     @keyframes neonPulse {
-      0% { box-shadow: 0 0 20px hotpink, 0 0 40px crimson; }
-      100% { box-shadow: 0 0 50px magenta, 0 0 100px hotpink; }
+      0% { box-shadow: 0 0 15px hotpink, 0 0 30px crimson; }
+      100% { box-shadow: 0 0 40px magenta, 0 0 70px hotpink; }
     }
 
     #result {
-      margin-top: 50px;
-      font-size: 36px;
+      margin-top: 35px;
+      font-size: 24px;
       color: #ff69b4;
-      min-height: 100px;
+      min-height: 80px;
       font-weight: 900;
       text-shadow:
-        0 0 10px #ff69b4,
-        0 0 30px #ff1493;
+        0 0 7px #ff69b4,
+        0 0 20px #ff1493;
       animation: pulseText 1s ease-in-out infinite alternate;
       user-select: none;
+      padding: 0 10px;
     }
     @keyframes pulseText {
-      from { text-shadow: 0 0 10px #ff69b4; }
-      to { text-shadow: 0 0 30px #ff1493; }
+      from { text-shadow: 0 0 7px #ff69b4; }
+      to { text-shadow: 0 0 20px #ff1493; }
     }
 
     .confetti {
       position: fixed;
-      font-size: 30px;
+      font-size: 20px;
       animation: fall 3s linear forwards;
       user-select: none;
       pointer-events: none;
-      filter: drop-shadow(0 0 3px #fff);
+      filter: drop-shadow(0 0 2px #fff);
       z-index: 9999;
     }
 
@@ -173,12 +174,12 @@
 
     function createConfetti() {
       const emojis = ["🎉", "💥", "😂", "💩", "🤪", "🔥", "👻"];
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 30; i++) {
         const el = document.createElement("div");
         el.className = "confetti";
         el.style.left = Math.random() * window.innerWidth + "px";
         el.style.top = Math.random() * -100 + "px";
-        el.style.fontSize = (20 + Math.random() * 20) + "px";
+        el.style.fontSize = (15 + Math.random() * 15) + "px";
         el.style.animationDuration = (2 + Math.random() * 2) + "s";
         el.style.animationDelay = (Math.random() * 1.5) + "s";
         el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
