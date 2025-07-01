@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Sensual Reveal - Customizable with Links</title>
+<title>Sensual Reveal – Ultra Animated with Sparkles</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
+  /* Page & container */
   body {
     margin: 0;
     overflow: hidden;
-    background: radial-gradient(circle at center, #1a0000 30%, #000000 100%);
+    background: radial-gradient(circle at center, #330011 30%, #110005 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -17,109 +18,108 @@
     height: 100vh;
     font-family: 'Georgia', serif;
     color: #fce4ec;
-    user-select: none;
     position: relative;
   }
-
   #gameContainer {
     position: relative;
     width: 100vw;
     height: 80vh;
     overflow: hidden;
-    box-shadow: 0 0 60px 10px #ff0077cc inset;
-    background: radial-gradient(circle at center, #2a00003b 40%, transparent 70%);
+    box-shadow: inset 0 0 60px 10px #ff0077cc;
+    background: radial-gradient(circle at center, #44002244 40%, transparent 70%);
     margin-bottom: 10px;
+    animation: bgPulse 6s ease-in-out infinite;
   }
 
-  /* The links are the moving blocks */
+  /* Sparkles container */
+  #sparkles {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 5;
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: radial-gradient(circle, #ff66cc 0%, transparent 70%);
+    border-radius: 50%;
+    filter: drop-shadow(0 0 4px #ff66ccaa);
+    opacity: 0;
+    animation: sparkleTwinkle 3s linear infinite;
+  }
+
+  @keyframes sparkleTwinkle {
+    0%, 100% { opacity: 0; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-10px) scale(1.3); }
+  }
+
+  /* Leg links */
   #leftLegLink, #rightLegLink {
     position: absolute;
     top: 0;
     width: 50vw;
     height: 100vh;
-    overflow: hidden;
     z-index: 3;
     cursor: pointer;
     filter: brightness(0.85) saturate(1.4);
-    transition: all 1.8s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: subtlePulse 4s ease-in-out infinite;
+    animation: subtlePulse 4s ease-in-out infinite, sway 3s ease-in-out infinite;
+    transition: transform 0.4s ease, filter 0.4s ease;
   }
-  #rightLegLink {
-    animation-delay: 2s;
-  }
-  #leftLegLink:hover, #rightLegLink:hover {
-    filter: brightness(1.1) saturate(1.6);
-    transform: scale(1.05);
-    transition: all 0.4s ease;
+  #rightLegLink { animation-delay: 2s, 1.5s; }
+
+  #leftLegLink { left: -50vw; }
+  #rightLegLink { right: -50vw; }
+
+  #leftLegLink:hover,
+  #rightLegLink:hover {
+    filter: brightness(1.15) saturate(1.7);
+    transform: scale(1.1);
   }
 
-  #leftLegLink {
-    left: -50vw;
-    transform-origin: center;
-    transform: scaleX(-1);
+  /* Sexy CSS leg shapes */
+  .legShape {
+    position: absolute;
+    bottom: 0;
+    width: 40vw;
+    height: 90vh;
+    border-radius: 60% 40% 80% 20% / 90% 95% 5% 10%;
+    background: linear-gradient(150deg, #ff3366, #aa0033 80%);
+    box-shadow:
+      inset 0 0 30px 10px #ff3366cc,
+      0 0 30px 10px #ff003399;
+    filter: drop-shadow(0 0 5px #ff6699aa);
+  }
+  #rightLegLink .legShape {
+    border-radius: 40% 60% 20% 80% / 95% 90% 10% 5%;
+    background: linear-gradient(30deg, #ff3399, #bb0066 85%);
+    box-shadow:
+      inset 0 0 30px 10px #ff6699cc,
+      0 0 30px 10px #ff006699;
   }
 
-  #rightLegLink {
-    right: -50vw;
-  }
-
-  /* Images fill their parent links and do not capture pointer events */
-  #leftLegLink img, #rightLegLink img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-    user-select: none;
-  }
-
+  /* Reveal text */
   #revealItem {
     position: absolute;
     top: 52%;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(0);
     z-index: 4;
     font-size: 3em;
     font-weight: 900;
     letter-spacing: 1.5px;
-    opacity: 0;
-    transition: opacity 1s ease;
-    text-shadow:
-      0 0 15px #ff0077cc,
-      0 0 35px #ff0077cc;
+    color: #fce4ec;
+    text-shadow: 0 0 15px #ff0077cc, 0 0 35px #ff0077cc;
     font-family: 'Great Vibes', cursive;
     pointer-events: none;
-    user-select: none;
   }
-
   .visible {
-    opacity: 1;
-    animation: pulseText 2.5s infinite;
+    animation: textBounce 1s ease-out forwards, textPulse 2.5s ease-in-out 1s infinite;
   }
 
-  @keyframes pulseText {
-    0%, 100% {
-      text-shadow:
-        0 0 15px #ff3399cc,
-        0 0 40px #ff0077cc;
-    }
-    50% {
-      text-shadow:
-        0 0 35px #ff33aacc,
-        0 0 60px #ff0077cc;
-    }
-  }
-
-  @keyframes subtlePulse {
-    0%, 100% {
-      filter: brightness(0.85) saturate(1.4);
-      transform: scale(1) scaleX(var(--flip, 1));
-    }
-    50% {
-      filter: brightness(1) saturate(1.6);
-      transform: scale(1.03) scaleX(var(--flip, 1));
-    }
-  }
-
+  /* Replay button */
   #replayBtn {
     background: #ff0055cc;
     border: none;
@@ -130,190 +130,105 @@
     border-radius: 30px;
     cursor: pointer;
     box-shadow: 0 0 20px #ff0077cc;
-    user-select: none;
-    opacity: 0.9;
-    transition: opacity 0.3s ease;
-    font-family: 'Georgia', serif;
-    margin-right: 10px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-  #replayBtn:hover, #replayBtn:focus {
-    opacity: 1;
-    outline: none;
-    box-shadow: 0 0 30px 3px #ff66aa;
+  #replayBtn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 0 30px #ff3399cc;
   }
 
-  #controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
-    flex-wrap: wrap;
+  /* Keyframes */
+  @keyframes bgPulse {
+    0%,100% { box-shadow: inset 0 0 60px 10px #ff0077cc; }
+    50%   { box-shadow: inset 0 0 90px 15px #ff3399cc; }
   }
-
-  select {
-    font-size: 1em;
-    padding: 6px 12px;
-    border-radius: 8px;
-    border: 1px solid #ff0077cc;
-    background: #1a0000;
-    color: #fce4ec;
-    font-family: 'Georgia', serif;
-    cursor: pointer;
+  @keyframes subtlePulse {
+    0%,100% { filter: brightness(0.85) saturate(1.4); }
+    50%     { filter: brightness(1) saturate(1.6); }
   }
-  select:focus {
-    outline: none;
-    box-shadow: 0 0 10px 2px #ff66aa;
+  @keyframes sway {
+    0%,100% { transform: translateX(0) scale(1); }
+    25%     { transform: translateX(10px) scale(1.02); }
+    50%     { transform: translateX(0) scale(1.05); }
+    75%     { transform: translateX(-10px) scale(1.02); }
   }
-
-  /* Link containers below the reveal */
-  #linksContainer {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    color: #ff99bb;
-    font-family: 'Georgia', serif;
-    font-size: 0.95em;
+  @keyframes textBounce {
+    0%   { transform: translate(-50%, -50%) scale(0); }
+    60%  { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
   }
-  #linksContainer a {
-    color: #ff99bb;
-    text-decoration: none;
-    border-bottom: 1px dotted transparent;
-  }
-  #linksContainer a:hover, #linksContainer a:focus {
-    border-bottom: 1px dotted #ff66aa;
-    outline: none;
+  @keyframes textPulse {
+    0%,100% { text-shadow: 0 0 15px #ff3399cc, 0 0 40px #ff0077cc; }
+    50%     { text-shadow: 0 0 35px #ff33aacc, 0 0 60px #ff0077cc; }
   }
 </style>
 </head>
 <body>
 
-<div id="gameContainer" role="main" aria-label="Sensual Reveal Animation">
-  <a id="leftLegLink" href="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80" target="_blank" title="Open Left Leg Image">
-    <img id="leftLeg" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80" alt="Left Leg" />
-  </a>
-  <a id="rightLegLink" href="https://images.unsplash.com/photo-1532543763498-97e1aa3d4e0e?auto=format&fit=crop&w=800&q=80" target="_blank" title="Open Right Leg Image">
-    <img id="rightLeg" src="https://images.unsplash.com/photo-1532543763498-97e1aa3d4e0e?auto=format&fit=crop&w=800&q=80" alt="Right Leg" />
-  </a>
+<div id="gameContainer">
+  <a id="leftLegLink" href="#"><div class="legShape"></div></a>
+  <a id="rightLegLink" href="#"><div class="legShape"></div></a>
   <div id="revealItem">🔥 Hot & Ready 🔥</div>
-  <audio id="revealSound" preload="auto"></audio>
-  <audio id="ambientSound" preload="auto" loop></audio>
+  <div id="sparkles"></div>
 </div>
-
-<div id="controls" role="region" aria-label="Controls">
-  <label>
-    Left Leg:
-    <select id="leftLegSelect" aria-label="Select Left Leg Image">
-      <option value="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80">Classic Pose</option>
-      <option value="https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80">Silky Elegance</option>
-      <option value="https://images.unsplash.com/photo-1542068829-1115f7259450?auto=format&fit=crop&w=800&q=80">High Heel Grace</option>
-    </select>
-  </label>
-
-  <label>
-    Right Leg:
-    <select id="rightLegSelect" aria-label="Select Right Leg Image">
-      <option value="https://images.unsplash.com/photo-1532543763498-97e1aa3d4e0e?auto=format&fit=crop&w=800&q=80">Classic Pose</option>
-      <option value="https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&w=800&q=80">Silky Elegance</option>
-      <option value="https://images.unsplash.com/photo-1525097487452-6278ff080c31?auto=format&fit=crop&w=800&q=80">High Heel Grace</option>
-    </select>
-  </label>
-
-  <label>
-    Reveal Sound:
-    <select id="soundSelect" aria-label="Select Reveal Sound">
-      <option value="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">Clang & Wobble</option>
-      <option value="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg">Wood Flick</option>
-      <option value="https://actions.google.com/sounds/v1/cartoon/slide_whistle.ogg">Slide Whistle</option>
-    </select>
-  </label>
-
-  <button id="replayBtn" title="Replay Animation">Replay</button>
-</div>
-
-<!-- Links showing current selected URLs -->
-<div id="linksContainer" aria-live="polite" aria-atomic="true">
-  <a id="leftLegCurrentLink" href="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=80" target="_blank" title="Open Left Leg Image">Left Leg Image</a>
-  <a id="rightLegCurrentLink" href="https://images.unsplash.com/photo-1532543763498-97e1aa3d4e0e?auto=format&fit=crop&w=800&q=80" target="_blank" title="Open Right Leg Image">Right Leg Image</a>
-  <a id="revealSoundCurrentLink" href="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" target="_blank" title="Play Reveal Sound">Reveal Sound</a>
-</div>
+<button id="replayBtn">Replay</button>
 
 <script>
-  const leftLegLink = document.getElementById("leftLegLink");
-  const rightLegLink = document.getElementById("rightLegLink");
-  const leftLegImg = document.getElementById("leftLeg");
-  const rightLegImg = document.getElementById("rightLeg");
-  const revealItem = document.getElementById("revealItem");
-  const revealSound = document.getElementById("revealSound");
-  const ambientSound = document.getElementById("ambientSound");
-  const replayBtn = document.getElementById("replayBtn");
+  const left = document.getElementById('leftLegLink');
+  const right = document.getElementById('rightLegLink');
+  const text = document.getElementById('revealItem');
+  const btn = document.getElementById('replayBtn');
+  const sparkleContainer = document.getElementById('sparkles');
 
-  const leftLegSelect = document.getElementById("leftLegSelect");
-  const rightLegSelect = document.getElementById("rightLegSelect");
-  const soundSelect = document.getElementById("soundSelect");
-
-  const leftLegCurrentLink = document.getElementById("leftLegCurrentLink");
-  const rightLegCurrentLink = document.getElementById("rightLegCurrentLink");
-  const revealSoundCurrentLink = document.getElementById("revealSoundCurrentLink");
-
-  function reset() {
-    leftLegLink.style.left = "-50vw";
-    leftLegLink.style.opacity = "0";
-    rightLegLink.style.right = "-50vw";
-    rightLegLink.style.opacity = "0";
-    revealItem.classList.remove("visible");
-    revealItem.style.opacity = "0";
-
-    revealSound.pause();
-    revealSound.currentTime = 0;
-
-    ambientSound.pause();
+  function createSparkles(count = 30) {
+    sparkleContainer.innerHTML = ''; // clear existing sparkles
+    for (let i = 0; i < count; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.classList.add('sparkle');
+      // Random start position inside the container
+      sparkle.style.left = Math.random() * 100 + '%';
+      sparkle.style.top = Math.random() * 80 + '%';
+      // Random animation delay so sparkles twinkle asynchronously
+      sparkle.style.animationDelay = (Math.random() * 3) + 's';
+      sparkleContainer.appendChild(sparkle);
+    }
   }
 
-  function startAnimation() {
+  function playRevealSound() {
+    const ctx = new (AudioContext||webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type='sine'; osc.frequency.value=700;
+    gain.gain.value=0.001;
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start();
+    osc.frequency.linearRampToValueAtTime(1200, ctx.currentTime+0.3);
+    gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime+0.1);
+    gain.gain.linearRampToValueAtTime(0.001, ctx.currentTime+0.35);
+    osc.stop(ctx.currentTime+0.35);
+  }
+
+  function reset() {
+    left.style.left = '-50vw'; left.style.opacity = '0';
+    right.style.right = '-50vw'; right.style.opacity = '0';
+    text.classList.remove('visible');
+  }
+
+  function start() {
     reset();
-
-    ambientSound.volume = 0.15;
-    ambientSound.src = "https://actions.google.com/sounds/v1/ambiences/forest.ogg"; // ambient loop sound
-    ambientSound.play();
-
-    // Update image sources & their link hrefs
-    leftLegImg.src = leftLegSelect.value;
-    rightLegImg.src = rightLegSelect.value;
-    leftLegLink.href = leftLegSelect.value;
-    rightLegLink.href = rightLegSelect.value;
-    leftLegCurrentLink.href = leftLegSelect.value;
-    rightLegCurrentLink.href = rightLegSelect.value;
-
-    // Update reveal sound src & link
-    revealSound.src = soundSelect.value;
-    revealSoundCurrentLink.href = soundSelect.value;
-
+    createSparkles(30);  // generate 30 sparkles on each start
     setTimeout(() => {
-      leftLegLink.style.opacity = "1";
-      rightLegLink.style.opacity = "1";
-
-      leftLegLink.style.left = "0";
-      rightLegLink.style.right = "0";
+      left.style.opacity='1'; left.style.left='0';
+      right.style.opacity='1'; right.style.right='0';
     }, 100);
-
     setTimeout(() => {
-      revealSound.play();
-      revealItem.classList.add("visible");
+      playRevealSound();
+      text.classList.add('visible');
     }, 3500);
   }
 
-  replayBtn.addEventListener("click", startAnimation);
-
-  leftLegSelect.addEventListener("change", startAnimation);
-  rightLegSelect.addEventListener("change", startAnimation);
-  soundSelect.addEventListener("change", () => {
-    revealSound.src = soundSelect.value;
-    revealSoundCurrentLink.href = soundSelect.value;
-  });
-
-  // Start animation on page load
-  window.addEventListener("load", startAnimation);
+  btn.addEventListener('click', start);
+  window.addEventListener('load', start);
 </script>
 
 </body>
