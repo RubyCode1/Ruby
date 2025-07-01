@@ -4,22 +4,27 @@
   <meta charset="UTF-8" />
   <title>Diana's Naughty Dash</title>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       overflow: hidden;
       background: black;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
     }
 
     canvas {
       display: none;
       background: #222;
       border: 2px solid #fff;
+      margin-top: 10px;
     }
 
     #startBtn, #jumpBtn {
@@ -126,7 +131,6 @@
 
     window.addEventListener("keyup", (e) => keys[e.key] = false);
 
-    // ✅ FIX: Working jump button on both mobile and desktop
     jumpBtn.addEventListener("click", triggerJump);
     jumpBtn.addEventListener("touchstart", (e) => {
       e.preventDefault();
