@@ -2,23 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Legs Reveal</title>
+  <title>Sensual Reveal</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: #000;
+      background: radial-gradient(#000 40%, #1a1a1a 100%);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: sans-serif;
+      font-family: 'Georgia', serif;
     }
 
     #gameContainer {
       position: relative;
       width: 100vw;
       height: 100vh;
+      overflow: hidden;
     }
 
     .leg {
@@ -27,29 +28,33 @@
       width: 50vw;
       height: 100vh;
       object-fit: cover;
-      transition: all 2s ease;
+      transition: all 2.5s ease-in-out;
       z-index: 2;
+      filter: brightness(0.9) saturate(1.2);
     }
 
     #leftLeg {
-      left: 0;
-      transform: scaleX(-1); /* Mirror image for symmetry */
+      left: -50vw;
+      transform: scaleX(-1);
     }
 
     #rightLeg {
-      right: 0;
+      right: -50vw;
     }
 
     #revealItem {
       position: absolute;
-      top: 50%;
+      top: 52%;
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 1;
-      font-size: 3em;
-      color: white;
+      font-size: 2.8em;
+      color: #fce4ec;
+      font-weight: bold;
+      letter-spacing: 1px;
       opacity: 0;
       transition: opacity 1s ease;
+      text-shadow: 0 0 10px #ff69b4;
     }
 
     .visible {
@@ -60,33 +65,35 @@
 <body>
 
 <div id="gameContainer">
-  <!-- Replace src with your own leg images -->
+  <!-- Replace with your sensual PNGs -->
   <img id="leftLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Left Leg">
   <img id="rightLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Right Leg">
-  <div id="revealItem">💎 Hidden Treasure!</div>
+  <div id="revealItem">💋 Just for You</div>
+  <audio id="revealSound" src="https://assets.mixkit.co/sfx/preview/mixkit-magical-appearance-342.wav"></audio>
 </div>
 
 <script>
   const leftLeg = document.getElementById("leftLeg");
   const rightLeg = document.getElementById("rightLeg");
   const revealItem = document.getElementById("revealItem");
+  const sound = document.getElementById("revealSound");
 
-  // Close legs (cover center)
+  // Slide in
   setTimeout(() => {
-    leftLeg.style.left = "25vw";
-    rightLeg.style.right = "25vw";
-  }, 1000);
-
-  // Pause
-  setTimeout(() => {
-    // Open legs
     leftLeg.style.left = "0";
     rightLeg.style.right = "0";
-  }, 4000);
+  }, 1000);
 
-  // Reveal item
+  // Pause and slide out
+  setTimeout(() => {
+    leftLeg.style.left = "-50vw";
+    rightLeg.style.right = "-50vw";
+  }, 4500);
+
+  // Reveal and play sound
   setTimeout(() => {
     revealItem.classList.add("visible");
+    sound.play();
   }, 6000);
 </script>
 
