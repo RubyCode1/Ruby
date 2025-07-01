@@ -18,6 +18,7 @@
       display: none;
       background: #222;
       border: 2px solid #fff;
+      touch-action: none; /* Prevent default touch behaviors */
     }
     #startBtn {
       font-size: 24px;
@@ -107,6 +108,21 @@
 
     window.addEventListener("keyup", (e) => keys[e.key] = false);
 
+    // Mobile tap to jump
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault(); // Prevent scrolling on tap
+
+      if (!player.jumping) {
+        player.dy = -12;
+        player.jumping = true;
+        score++;
+        if (score > highScore) highScore = score;
+        jumpSound.currentTime = 0;
+        jumpSound.play();
+        showSpeech(getRandomMessage(jumpMessages), 60);
+      }
+    }, { passive: false });
+
     function drawBackground() {
       bgX -= 2;
       if (bgX <= -canvas.width) bgX = 0;
@@ -128,54 +144,61 @@
       ctx.stroke();
     }
 
-    // *** Fixed drawSpeechBubble function ***
     function drawSpeechBubble(text, x, y) {
       ctx.font = "14px 'Segoe UI'";
-      const maxWidth = 160;
       const paddingX = 15;
       const paddingY = 10;
+      const maxWidth = 200;
       const words = text.split(" ");
       const lines = [];
-      let currentLine = "";
+      let currentLine = words[0];
 
-      for (let word of words) {
-        const testLine = currentLine + word + " ";
-        const testWidth = ctx.measureText(testLine).width;
-        if (testWidth > maxWidth && currentLine !== "") {
-          lines.push(currentLine.trim());
-          currentLine = word + " ";
+      // Proper line wrapping within maxWidth
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+          currentLine += " " + word;
         } else {
-          currentLine = testLine;
+          lines.push(currentLine);
+          currentLine = word;
         }
       }
-      lines.push(currentLine.trim());
+      lines.push(currentLine);
 
       const lineHeight = 18;
       const bubbleWidth = maxWidth + paddingX * 2;
       const bubbleHeight = lines.length * lineHeight + paddingY * 2;
-      const bubbleX = x - bubbleWidth / 2 + player.width / 2; // center bubble horizontally above player
-      const bubbleY = y - bubbleHeight - 30;
 
-      // Draw bubble background
+      // Position bubble so it never goes off canvas right edge
+      let bubbleX = x - bubbleWidth / 2;
+      if (bubbleX < 5) bubbleX = 5;
+      if (bubbleX + bubbleWidth > canvas.width - 5) bubbleX = canvas.width - bubbleWidth - 5;
+
+      let bubbleY = y - bubbleHeight - 30;
+      if (bubbleY < 5) bubbleY = y + 30; // if too close to top, put below player
+
+      // Draw bubble rectangle with rounded corners
       ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 2;
       roundRect(ctx, bubbleX, bubbleY, bubbleWidth, bubbleHeight, 12);
 
-      // Draw tail
+      // Draw the little pointer/arrow below bubble center
       ctx.beginPath();
-      ctx.moveTo(bubbleX + bubbleWidth / 2 - 10, bubbleY + bubbleHeight);
-      ctx.lineTo(bubbleX + bubbleWidth / 2, bubbleY + bubbleHeight + 10);
-      ctx.lineTo(bubbleX + bubbleWidth / 2 + 10, bubbleY + bubbleHeight);
+      const pointerX = x;
+      const pointerY = bubbleY + bubbleHeight;
+      ctx.moveTo(pointerX - 15, pointerY);
+      ctx.lineTo(pointerX, pointerY + 15);
+      ctx.lineTo(pointerX + 15, pointerY);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
 
-      // Draw text inside bubble
+      // Draw text lines inside bubble
       ctx.fillStyle = "#222";
-      ctx.textAlign = "left";
       ctx.textBaseline = "top";
-
+      ctx.textAlign = "left";
       for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], bubbleX + paddingX, bubbleY + paddingY + i * lineHeight);
       }
@@ -184,7 +207,8 @@
     function drawPlayer() {
       ctx.drawImage(dianaImg, player.x, player.y, player.width, player.height);
       if (speech.timer > 0 && speech.text) {
-        drawSpeechBubble(speech.text, player.x, player.y);
+        // Put bubble centered horizontally above player
+        drawSpeechBubble(speech.text, player.x + player.width / 2, player.y);
       }
     }
 
@@ -263,7 +287,6 @@
     }
 
     startBtn.addEventListener("click", startGame);
-
   </script>
 </body>
 </html>
