@@ -2,17 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wall Reveal Game</title>
+  <title>Legs Reveal</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: #111;
+      background: #000;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      color: white;
       font-family: sans-serif;
     }
 
@@ -22,21 +21,22 @@
       height: 100vh;
     }
 
-    .wall {
+    .leg {
       position: absolute;
       top: 0;
       width: 50vw;
       height: 100vh;
-      background-color: #333;
-      z-index: 2;
+      object-fit: cover;
       transition: all 2s ease;
+      z-index: 2;
     }
 
-    #leftWall {
+    #leftLeg {
       left: 0;
+      transform: scaleX(-1); /* Mirror image for symmetry */
     }
 
-    #rightWall {
+    #rightLeg {
       right: 0;
     }
 
@@ -47,6 +47,7 @@
       transform: translate(-50%, -50%);
       z-index: 1;
       font-size: 3em;
+      color: white;
       opacity: 0;
       transition: opacity 1s ease;
     }
@@ -58,40 +59,36 @@
 </head>
 <body>
 
-  <div id="gameContainer">
-    <div id="leftWall" class="wall"></div>
-    <div id="rightWall" class="wall"></div>
-    <div id="revealItem">🎁 Surprise!</div>
-  </div>
+<div id="gameContainer">
+  <!-- Replace src with your own leg images -->
+  <img id="leftLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Left Leg">
+  <img id="rightLeg" class="leg" src="https://i.imgur.com/GD6GfPk.png" alt="Right Leg">
+  <div id="revealItem">💎 Hidden Treasure!</div>
+</div>
 
-  <script>
-    const leftWall = document.getElementById("leftWall");
-    const rightWall = document.getElementById("rightWall");
-    const revealItem = document.getElementById("revealItem");
+<script>
+  const leftLeg = document.getElementById("leftLeg");
+  const rightLeg = document.getElementById("rightLeg");
+  const revealItem = document.getElementById("revealItem");
 
-    // Step 1: Close walls
-    setTimeout(() => {
-      leftWall.style.width = "50vw";
-      rightWall.style.width = "50vw";
-    }, 500);
+  // Close legs (cover center)
+  setTimeout(() => {
+    leftLeg.style.left = "25vw";
+    rightLeg.style.right = "25vw";
+  }, 1000);
 
-    // Step 2: Close tighter
-    setTimeout(() => {
-      leftWall.style.width = "50%";
-      rightWall.style.width = "50%";
-    }, 1000);
+  // Pause
+  setTimeout(() => {
+    // Open legs
+    leftLeg.style.left = "0";
+    rightLeg.style.right = "0";
+  }, 4000);
 
-    // Step 3: Pause, then open walls
-    setTimeout(() => {
-      leftWall.style.width = "0";
-      rightWall.style.width = "0";
-    }, 3000);
-
-    // Step 4: Reveal item
-    setTimeout(() => {
-      revealItem.classList.add("visible");
-    }, 5000);
-  </script>
+  // Reveal item
+  setTimeout(() => {
+    revealItem.classList.add("visible");
+  }, 6000);
+</script>
 
 </body>
 </html>
