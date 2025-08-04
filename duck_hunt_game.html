@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duck Hunt</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #4A90E2 0%, #87CEEB 30%, #98FB98 70%, #228B22 100%);
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 2px, transparent 2px),
+                radial-gradient(circle at 80% 80%, rgba(255,255,255,0.2) 1px, transparent 1px);
+            background-size: 100px 100px, 150px 150px;
+            animation: twinkle 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            cursor: crosshair;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .duck {
+            position: absolute;
+            width: 60px;
+            height: 40px;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            z-index: 10;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+            animation: bob 2s ease-in-out infinite;
+        }
+
+        .duck:hover {
+            transform: scale(1.2) rotate(5deg);
+            filter: drop-shadow(3px 3px 6px rgba(255,215,0,0.8));
+        }
+
+        @keyframes bob {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: float 20s infinite linear;
+        }
+
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+        }
+
+        .cloud1 {
+            width: 80px;
+            height: 40px;
+            top: 10%;
+            left: -100px;
+        }
+
+        .cloud1::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+
+        .cloud1::after {
+            width: 60px;
+            height: 40px;
+            top: -15px;
+            right: 10px;
+        }
+
+        .cloud2 {
+            width: 60px;
+            height: 30px;
+            top: 25%;
+            left: -80px;
+            animation-delay: -10s;
+        }
+
+        .cloud2::before {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            left: 5px;
+        }
+
+        .cloud2::after {
+            width: 50px;
+            height: 30px;
+            top: -10px;
+            right: 5px;
+        }
+
+        @keyframes float {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(calc(100vw + 100px));
+            }
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.9);
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        #ui div {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        #ui div::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            background: #4CAF50;
+            box-shadow: 0 0 8px #4CAF50;
+        }
+
+        #reloadBtn {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s ease;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #reloadBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        #reloadBtn:active {
+            transform: translateY(0px);
+        }
+
+        #reloadBtn.reloading {
+            background: #666;
+            cursor: not-allowed;
+            animation: reloadPulse 1.5s ease-in-out;
+        }
+
+        @keyframes reloadPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .reload-effect {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+            z-index: 1000;
+            pointer-events: none;
+            animation: reloadNotification 1.5s ease-out forwards;
+        }
+
+        @keyframes reloadNotification {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); opacity: 0; }
+        }
+
+        #gameOver {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            z-index: 1000;
+            max-width: 90%;
+        }
+
+        #gameOver h2 {
+            margin-bottom: 20px;
+            font-size: 32px;
+            color: #ff6b6b;
+        }
+
+        #gameOver p {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+
+        #restartBtn {
+            background: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        #restartBtn:hover {
+            background: #45a049;
+        }
+
+        .shot-effect {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #FFD700 0%, #FF8C00 30%, #FF4500 70%, #DC143C 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: shotBlast 0.4s ease-out forwards;
+            z-index: 50;
+            box-shadow: 0 0 20px #FFD700;
+        }
+
+        @keyframes shotBlast {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+                box-shadow: 0 0 20px #FFD700;
+            }
+            50% {
+                transform: scale(2) rotate(180deg);
+                opacity: 0.8;
+                box-shadow: 0 0 40px #FF4500;
+            }
+            100% {
+                transform: scale(4) rotate(360deg);
+                opacity: 0;
+                box-shadow: 0 0 60px transparent;
+            }
+        }
+
+        .hit-duck {
+            animation: fall 1s ease-in forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: rotate(0deg) translateY(0);
+            }
+            100% {
+                transform: rotate(180deg) translateY(200px);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .duck {
+                width: 80px;
+                height: 60px;
+                font-size: 50px;
+            }
+            
+            #ui {
+                font-size: 24px;
+            }
+            
+            #gameOver h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="cloud cloud1"></div>
+        <div class="cloud cloud2"></div>
+        
+        <div id="ui">
+            <div>Score: <span id="score">0</span></div>
+            <div>Shots: <span id="shots">10</span>/<span id="maxShots">10</span></div>
+            <div>Level: <span id="level">1</span></div>
+        </div>
+        
+        <button id="reloadBtn">🔄 RELOAD</button>
+        
+        <div id="gameOver">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="finalScore">0</span></p>
+            <p>Level Reached: <span id="finalLevel">1</span></p>
+            <p>Accuracy: <span id="accuracy">0</span>%</p>
+            <button id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        class DuckHunt {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.gameContainer = document.getElementById('gameContainer');
+                
+                this.score = 0;
+                this.shots = 10;
+                this.maxShots = 10;
+                this.level = 1;
+                this.ducks = [];
+                this.gameRunning = true;
+                this.totalShots = 0;
+                this.hits = 0;
+                this.isReloading = false;
+                
+                this.duckEmojis = ['🦆', '🐦', '🐤', '🦜', '🕊️'];
+                this.specialDucks = ['🦅', '🦉', '🦚'];
+                this.rareDucks = ['🦢', '🦩'];
+                
+                this.setupCanvas();
+                this.setupEventListeners();
+                this.createAudioContext();
+                this.startGame();
+            }
+            
+            setupCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+            
+            createAudioContext() {
+                // Create Web Audio API context for sound effects
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Sound effect methods
+                this.playShootSound = () => {
+                    // Enhanced shooting sound with multiple layers
+                    const createLayer = (freq, decay, vol) => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(freq * 0.3, this.audioContext.currentTime + decay);
+                        
+                        gainNode.gain.setValueAtTime(vol, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + decay);
+                        
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + decay);
+                    };
+                    
+                    createLayer(1000, 0.1, 0.3);
+                    createLayer(500, 0.15, 0.2);
+                    createLayer(250, 0.08, 0.1);
+                };
+                
+                this.playHitSound = () => {
+                    // Victory chime sound
+                    const notes = [523, 659, 784]; // C, E, G
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gainNode = this.audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(this.audioContext.destination);
+                            
+                            oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.4, this.audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                            
+                            oscillator.start(this.audioContext.currentTime);
+                            oscillator.stop(this.audioContext.currentTime + 0.3);
+                        }, i * 50);
+                    });
+                };
+                
+                this.playReloadSound = () => {
+                    // Mechanical reload sound with clicks and swoosh
+                    const createClick = (delay, pitch) => {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gainNode = this.audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(this.audioContext.destination);
+                            
+                            oscillator.frequency.setValueAtTime(pitch, this.audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
+                            
+                            oscillator.start(this.audioContext.currentTime);
+                            oscillator.stop(this.audioContext.currentTime + 0.05);
+                        }, delay);
+                    };
+                    
+                    // Multiple click sounds for mechanical effect
+                    createClick(0, 800);
+                    createClick(200, 600);
+                    createClick(400, 700);
+                    createClick(800, 900);
+                    
+                    // Swoosh sound at the end
+                    setTimeout(() => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+                        
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+                        
+                        oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                        oscillator.frequency.exponentialRampToValueAtTime(800, this.audioContext.currentTime + 0.3);
+                        
+                        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+                        
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.3);
+                    }, 1000);
+                };
+                
+                this.playMissSound = () => {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + 0.4);
+                    
+                    gainNode.gain.setValueAtTime(0.25, this.audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.4);
+                    
+                    oscillator.start(this.audioContext.currentTime);
+                    oscillator.stop(this.audioContext.currentTime + 0.4);
+                };
+                
+                this.playLevelUpSound = () => {
+                    const notes = [440, 523, 659, 784, 1047]; // A, C, E, G, C
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            const oscillator = this.audioContext.createOscillator();
+                            const gainNode = this.audioContext.createGain();
+                            
+                            oscillator.connect(gainNode);
+                            gainNode.connect(this.audioContext.destination);
+                            
+                            oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+                            
+                            oscillator.start(this.audioContext.currentTime);
+                            oscillator.stop(this.audioContext.currentTime + 0.2);
+                        }, i * 80);
+                    });
+                };
+            }
+            
+            setupEventListeners() {
+                // Handle both mouse and touch events
+                const handleShoot = (e) => {
+                    if (!this.gameRunning || this.shots <= 0) return;
+                    
+                    e.preventDefault();
+                    
+                    // Get coordinates for both mouse and touch
+                    let clientX, clientY;
+                    if (e.type === 'touchstart') {
+                        clientX = e.touches[0].clientX;
+                        clientY = e.touches[0].clientY;
+                    } else {
+                        clientX = e.clientX;
+                        clientY = e.clientY;
+                    }
+                    
+                    this.shoot(clientX, clientY);
+                };
+                
+                this.gameContainer.addEventListener('click', handleShoot);
+                this.gameContainer.addEventListener('touchstart', handleShoot);
+                
+                document.getElementById('restartBtn').addEventListener('click', () => {
+                    this.restartGame();
+                });
+                
+                document.getElementById('reloadBtn').addEventListener('click', () => {
+                    this.reload();
+                });
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    this.setupCanvas();
+                });
+            }
+            
+            shoot(x, y) {
+                if (!this.gameRunning || this.shots <= 0 || this.isReloading) return;
+                
+                this.shots--;
+                this.totalShots++;
+                this.playShootSound();
+                
+                // Create shot effect
+                this.createShotEffect(x, y);
+                
+                // Add screen shake effect
+                document.body.style.animation = 'shake 0.2s ease-in-out';
+                setTimeout(() => document.body.style.animation = '', 200);
+                
+                // Check if any duck was hit
+                let hit = false;
+                this.ducks.forEach((duck, index) => {
+                    if (this.isDuckHit(duck, x, y)) {
+                        this.hitDuck(duck, index);
+                        hit = true;
+                    }
+                });
+                
+                if (!hit) {
+                    this.playMissSound();
+                }
+                
+                this.updateUI();
+                this.checkGameOver();
+            }
+            
+            createShotEffect(x, y) {
+                const effect = document.createElement('div');
+                effect.className = 'shot-effect';
+                effect.style.left = (x - 10) + 'px';
+                effect.style.top = (y - 10) + 'px';
+                this.gameContainer.appendChild(effect);
+                
+                setTimeout(() => {
+                    effect.remove();
+                }, 300);
+            }
+            
+            isDuckHit(duck, x, y) {
+                const rect = duck.element.getBoundingClientRect();
+                return x >= rect.left && x <= rect.right && 
+                       y >= rect.top && y <= rect.bottom;
+            }
+            
+            hitDuck(duck, index) {
+                this.hits++;
+                this.score += duck.points;
+                this.playHitSound();
+                
+                duck.element.classList.add('hit-duck');
+                duck.hit = true;
+                
+                setTimeout(() => {
+                    if (duck.element && duck.element.parentNode) {
+                        duck.element.remove();
+                    }
+                    this.ducks.splice(index, 1);
+                }, 1000);
+            }
+            
+            createDuck() {
+                const duck = {
+                    element: document.createElement('div'),
+                    speed: 2 + (this.level * 0.5) + Math.random() * 2,
+                    direction: Math.random() > 0.5 ? 1 : -1,
+                    points: 10,
+                    hit: false,
+                    type: 'normal'
+                };
+                
+                duck.element.className = 'duck';
+                
+                // Determine duck type and emoji
+                const rand = Math.random();
+                if (rand < 0.05) { // 5% chance for rare duck
+                    duck.element.innerHTML = this.rareDucks[Math.floor(Math.random() * this.rareDucks.length)];
+                    duck.points = 50;
+                    duck.type = 'rare';
+                    duck.speed *= 1.5;
+                } else if (rand < 0.2) { // 15% chance for special duck
+                    duck.element.innerHTML = this.specialDucks[Math.floor(Math.random() * this.specialDucks.length)];
+                    duck.points = 25;
+                    duck.type = 'special';
+                    duck.speed *= 1.2;
+                } else { // Normal duck
+                    duck.element.innerHTML = this.duckEmojis[Math.floor(Math.random() * this.duckEmojis.length)];
+                }
+                
+                // Add special styling for rare ducks
+                if (duck.type === 'rare') {
+                    duck.element.style.filter = 'drop-shadow(0 0 10px gold) hue-rotate(45deg)';
+                } else if (duck.type === 'special') {
+                    duck.element.style.filter = 'drop-shadow(0 0 8px silver)';
+                }
+                
+                // Position duck
+                if (duck.direction > 0) {
+                    duck.element.style.left = '-60px';
+                } else {
+                    duck.element.style.left = window.innerWidth + 'px';
+                    duck.element.style.transform = 'scaleX(-1)';
+                }
+                
+                duck.element.style.top = (Math.random() * (window.innerHeight * 0.6)) + 'px';
+                
+                this.gameContainer.appendChild(duck.element);
+                this.ducks.push(duck);
+            }
+            
+            updateDucks() {
+                this.ducks.forEach((duck, index) => {
+                    if (duck.hit) return;
+                    
+                    const currentLeft = parseInt(duck.element.style.left);
+                    const newLeft = currentLeft + (duck.speed * duck.direction);
+                    
+                    duck.element.style.left = newLeft + 'px';
+                    
+                    // Remove duck if it goes off screen
+                    if (newLeft < -100 || newLeft > window.innerWidth + 100) {
+                        duck.element.remove();
+                        this.ducks.splice(index, 1);
+                    }
+                });
+            }
+            
+            updateUI() {
+                document.getElementById('score').textContent = this.score;
+                document.getElementById('shots').textContent = this.shots;
+                document.getElementById('maxShots').textContent = this.maxShots;
+                document.getElementById('level').textContent = this.level;
+                
+                // Update reload button state
+                const reloadBtn = document.getElementById('reloadBtn');
+                if (this.shots === 0 && !this.isReloading) {
+                    reloadBtn.style.display = 'flex';
+                    reloadBtn.textContent = '🔄 RELOAD';
+                    reloadBtn.classList.remove('reloading');
+                } else if (this.isReloading) {
+                    reloadBtn.textContent = '⏳ RELOADING...';
+                    reloadBtn.classList.add('reloading');
+                } else {
+                    reloadBtn.style.display = 'none';
+                }
+            }
+            
+            reload() {
+                if (this.isReloading || this.shots > 0) return;
+                
+                this.isReloading = true;
+                if (this.playReloadSound) {
+                    this.playReloadSound();
+                }
+                
+                // Show reload effect
+                const reloadEffect = document.createElement('div');
+                reloadEffect.className = 'reload-effect';
+                reloadEffect.textContent = '🔄 RELOADING';
+                document.body.appendChild(reloadEffect);
+                
+                setTimeout(() => {
+                    reloadEffect.remove();
+                }, 1500);
+                
+                // Reload after 1.5 seconds
+                setTimeout(() => {
+                    this.shots = this.maxShots;
+                    this.isReloading = false;
+                    this.updateUI();
+                }, 1500);
+                
+                this.updateUI();
+            }
+            
+            checkGameOver() {
+                if (this.shots <= 0 && this.ducks.length === 0 && !this.isReloading) {
+                    this.endGame();
+                }
+            }
+            
+            checkLevelUp() {
+                if (this.score >= this.level * 100) {
+                    this.level++;
+                    this.maxShots += 2; // Increase max shots each level
+                    this.shots += 5;
+                    this.playLevelUpSound();
+                    
+                    // Show level up notification
+                    const notification = document.createElement('div');
+                    notification.innerHTML = `🎉 LEVEL ${this.level}! 🎉`;
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        font-size: 36px;
+                        font-weight: bold;
+                        color: #FFD700;
+                        text-shadow: 3px 3px 6px rgba(0,0,0,0.8);
+                        z-index: 1000;
+                        pointer-events: none;
+                        animation: levelUpPulse 2s ease-out forwards;
+                    `;
+                    
+                    const keyframes = `
+                        @keyframes levelUpPulse {
+                            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+                            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+                            100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+                        }
+                    `;
+                    
+                    if (!document.querySelector('#levelUpKeyframes')) {
+                        const styleSheet = document.createElement('style');
+                        styleSheet.id = 'levelUpKeyframes';
+                        styleSheet.textContent = keyframes;
+                        document.head.appendChild(styleSheet);
+                    }
+                    
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 2000);
+                    
+                    this.updateUI();
+                }
+            }
+            
+            endGame() {
+                this.gameRunning = false;
+                
+                const accuracy = this.totalShots > 0 ? Math.round((this.hits / this.totalShots) * 100) : 0;
+                
+                document.getElementById('finalScore').textContent = this.score;
+                document.getElementById('finalLevel').textContent = this.level;
+                document.getElementById('accuracy').textContent = accuracy;
+                document.getElementById('gameOver').style.display = 'block';
+                
+                // Clear remaining ducks
+                this.ducks.forEach(duck => {
+                    if (duck.element && duck.element.parentNode) {
+                        duck.element.remove();
+                    }
+                });
+                this.ducks = [];
+            }
+            
+            restartGame() {
+                // Reset game state
+                this.score = 0;
+                this.shots = 10;
+                this.maxShots = 10;
+                this.level = 1;
+                this.totalShots = 0;
+                this.hits = 0;
+                this.gameRunning = true;
+                this.isReloading = false;
+                
+                // Clear existing ducks
+                this.ducks.forEach(duck => {
+                    if (duck.element && duck.element.parentNode) {
+                        duck.element.remove();
+                    }
+                });
+                this.ducks = [];
+                
+                // Hide game over screen
+                document.getElementById('gameOver').style.display = 'none';
+                
+                this.updateUI();
+                this.startGame();
+            }
+            
+            startGame() {
+                // Game loop
+                const gameLoop = () => {
+                    if (!this.gameRunning) return;
+                    
+                    this.updateDucks();
+                    this.checkLevelUp();
+                    
+                    // Spawn new ducks
+                    if (Math.random() < 0.02 + (this.level * 0.005)) {
+                        if (this.ducks.length < 3 + Math.floor(this.level / 2)) {
+                            this.createDuck();
+                        }
+                    }
+                    
+                    requestAnimationFrame(gameLoop);
+                };
+                
+                gameLoop();
+            }
+        }
+        
+        // Start the game when page loads
+        window.addEventListener('load', () => {
+            // Enable audio context on first user interaction
+            document.addEventListener('touchstart', function initAudio() {
+                new DuckHunt();
+                document.removeEventListener('touchstart', initAudio);
+            }, { once: true });
+            
+            document.addEventListener('click', function initAudio() {
+                new DuckHunt();
+                document.removeEventListener('click', initAudio);
+            }, { once: true });
+            
+            // For desktop users who don't click immediately
+            setTimeout(() => {
+                if (!window.duckHuntGame) {
+                    new DuckHunt();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
