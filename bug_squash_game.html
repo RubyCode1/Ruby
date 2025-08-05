@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Blaster Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a4d2e, #2d5016, #4a7c23);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(76, 175, 80, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(139, 195, 74, 0.1) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grass" patternUnits="userSpaceOnUse" width="30" height="30"><rect fill="%23365c1a" width="30" height="30"/><path d="M3 25 Q8 15 13 25 M17 25 Q22 15 27 25" stroke="%23447d1f" stroke-width="1.5" fill="none"/><circle cx="10" cy="8" r="1" fill="%234a7c23"/><circle cx="20" cy="12" r="0.8" fill="%23558b2f"/></pattern></defs><rect width="100" height="100" fill="url(%23grass)"/></svg>') repeat;
+        }
+
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            z-index: 100;
+        }
+
+        .ui-panel {
+            background: rgba(0,0,0,0.7);
+            padding: 10px 15px;
+            border-radius: 15px;
+            border: 2px solid #4a7c23;
+            backdrop-filter: blur(5px);
+        }
+
+        #combo {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            color: #ffeb3b;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            transform: scale(0);
+            z-index: 150;
+        }
+
+        #combo.show {
+            animation: comboFlash 1s ease-out forwards;
+        }
+
+        @keyframes comboFlash {
+            0% { transform: scale(0) rotate(-10deg); }
+            50% { transform: scale(1.3) rotate(5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        #startScreen, #gameOver {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            z-index: 300;
+        }
+
+        #gameOver {
+            display: none;
+        }
+
+        .title {
+            font-size: 48px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b35, #f7931e, #ffeb3b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            animation: titleGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.8)); }
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.4);
+            transition: all 0.3s ease;
+            margin: 10px;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.6);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(255, 107, 53, 0.4);
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .difficulty-btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            background: rgba(74, 124, 35, 0.8);
+            border: 2px solid #4a7c23;
+        }
+
+        .difficulty-btn.selected {
+            background: linear-gradient(45deg, #4a7c23, #6bc23a);
+            box-shadow: 0 0 15px rgba(107, 194, 58, 0.5);
+        }
+
+        .bug {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            transition: transform 0.1s;
+            z-index: 50;
+            animation: bugWiggle 2s ease-in-out infinite;
+        }
+
+        @keyframes bugWiggle {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        .bug:active {
+            transform: scale(0.8);
+        }
+
+        .bug.squashed {
+            animation: squashEffect 0.4s ease-out forwards;
+        }
+
+        @keyframes squashEffect {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.3) rotate(90deg); }
+            50% { transform: scale(0.8) rotate(180deg); }
+            75% { transform: scale(1.1) rotate(270deg); }
+            100% { transform: scale(0) rotate(360deg); opacity: 0; }
+        }
+
+        .bug-body {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+
+        .bug-normal {
+            background: 
+                radial-gradient(ellipse at 30% 20%, #4a4a4a 15%, transparent 25%),
+                radial-gradient(ellipse at 70% 20%, #4a4a4a 15%, transparent 25%),
+                linear-gradient(90deg, #2d4a22 0%, #4a7c35 30%, #2d4a22 70%, #1a3d1a 100%);
+            border-radius: 70% 30% 70% 30%;
+            position: relative;
+        }
+
+        .bug-normal::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: 
+                radial-gradient(ellipse, #654321 20%, #8B4513 40%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        .bug-normal::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 20%;
+            width: 60%;
+            height: 8px;
+            background: 
+                linear-gradient(90deg, transparent 0%, #2d4a22 20%, #4a7c35 50%, #2d4a22 80%, transparent 100%);
+            border-radius: 50%;
+        }
+
+        .bug-fast {
+            background: 
+                radial-gradient(ellipse at 30% 20%, #660000 15%, transparent 25%),
+                radial-gradient(ellipse at 70% 20%, #660000 15%, transparent 25%),
+                linear-gradient(90deg, #ff4444 0%, #cc2222 30%, #ff4444 70%, #aa0000 100%);
+            border-radius: 70% 30% 70% 30%;
+            animation: bugWiggle 1s ease-in-out infinite;
+            position: relative;
+        }
+
+        .bug-fast::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(ellipse, #aa0000 20%, #ff4444 40%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        .bug-fast::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 20%;
+            width: 60%;
+            height: 8px;
+            background: linear-gradient(90deg, transparent 0%, #ff4444 20%, #ffaa44 50%, #ff4444 80%, transparent 100%);
+            border-radius: 50%;
+        }
+
+        .bug-golden {
+            background: 
+                radial-gradient(ellipse at 30% 20%, #b8860b 15%, transparent 25%),
+                radial-gradient(ellipse at 70% 20%, #b8860b 15%, transparent 25%),
+                radial-gradient(ellipse, #ffd700, #ffb347, #ff8c00);
+            border-radius: 70% 30% 70% 30%;
+            animation: goldenGlow 1.5s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        .bug-golden::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background: radial-gradient(ellipse, #ffb347 20%, #ffd700 40%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        .bug-golden::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 20%;
+            width: 60%;
+            height: 8px;
+            background: linear-gradient(90deg, transparent 0%, #ffd700 20%, #ffff88 50%, #ffd700 80%, transparent 100%);
+            border-radius: 50%;
+        }
+
+        @keyframes goldenGlow {
+            from { filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8)); }
+            to { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)); }
+        }
+
+        .bug-antennae {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 12px;
+            background: #333;
+            border-radius: 1px;
+        }
+
+        .bug-antennae::before,
+        .bug-antennae::after {
+            content: '';
+            position: absolute;
+            width: 1px;
+            height: 10px;
+            background: #333;
+            border-radius: 1px;
+            top: -2px;
+        }
+
+        .bug-antennae::before { 
+            left: -4px; 
+            transform: rotate(-25deg);
+        }
+        .bug-antennae::after { 
+            right: -4px; 
+            transform: rotate(25deg);
+        }
+
+        .splat {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            pointer-events: none;
+            animation: splatEffect 1.5s ease-out forwards;
+            z-index: 40;
+        }
+
+        .splat-normal {
+            background: radial-gradient(circle, #8B4513 20%, #654321 50%, transparent 80%);
+            border-radius: 50% 40% 60% 30%;
+        }
+
+        .splat-golden {
+            background: radial-gradient(circle, #ffd700 20%, #ffb347 50%, transparent 80%);
+            border-radius: 50% 40% 60% 30%;
+        }
+
+        @keyframes splatEffect {
+            0% { opacity: 1; transform: scale(0.3) rotate(0deg); }
+            20% { opacity: 1; transform: scale(1.2) rotate(180deg); }
+            100% { opacity: 0; transform: scale(1.5) rotate(360deg); }
+        }
+
+        .score-popup {
+            position: absolute;
+            color: #ffeb3b;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 200;
+            animation: scoreFloat 1s ease-out forwards;
+        }
+
+        @keyframes scoreFloat {
+            0% { opacity: 1; transform: translateY(0) scale(0.5); }
+            50% { opacity: 1; transform: translateY(-30px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1); }
+        }
+
+        .powerup {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 60;
+            animation: powerupPulse 2s ease-in-out infinite;
+        }
+
+        .powerup-freeze {
+            background: radial-gradient(circle, #00bcd4, #0097a7);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
+        }
+
+        .powerup-double {
+            background: radial-gradient(circle, #4caf50, #388e3c);
+            box-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+        }
+
+        @keyframes powerupPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .frozen {
+            animation-play-state: paused !important;
+            filter: brightness(0.7) hue-rotate(180deg);
+        }
+
+        #particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffeb3b;
+            border-radius: 50%;
+            animation: particleFloat 3s linear infinite;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 0; transform: translateY(100vh) rotate(0deg); }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-20px) rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .title { font-size: 36px; }
+            .difficulty-buttons { flex-direction: column; align-items: center; }
+            #ui { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="particles"></div>
+        
+        <div id="ui">
+            <div class="ui-panel">
+                Score: <span id="score">0</span><br>
+                <small>Best: <span id="bestScore">0</span></small>
+            </div>
+            <div class="ui-panel" style="text-align: center;">
+                <div id="timer">30</div>
+                <small>seconds</small>
+            </div>
+            <div class="ui-panel" style="text-align: right;">
+                Bugs: <span id="bugsCount">0</span><br>
+                <small>Streak: <span id="streak">0</span></small>
+            </div>
+        </div>
+        
+        <div id="combo">COMBO x<span id="comboMultiplier">1</span>!</div>
+        
+        <div id="startScreen">
+            <h1 class="title">🐛 BUG BLASTER PRO 🐛</h1>
+            <p style="margin-bottom: 30px; font-size: 18px; max-width: 400px;">
+                Squash bugs before they escape! Golden bugs are worth more points!
+            </p>
+            
+            <div class="difficulty-buttons">
+                <button class="button difficulty-btn selected" data-difficulty="easy">
+                    🟢 EASY<br><small>Slow bugs</small>
+                </button>
+                <button class="button difficulty-btn" data-difficulty="normal">
+                    🟡 NORMAL<br><small>Mixed speed</small>
+                </button>
+                <button class="button difficulty-btn" data-difficulty="hard">
+                    🔴 HARD<br><small>Fast bugs</small>
+                </button>
+            </div>
+            
+            <button class="button" id="startButton">START GAME</button>
+        </div>
+        
+        <div id="gameOver">
+            <h2 class="title" style="font-size: 36px;">GAME OVER!</h2>
+            <div style="background: rgba(0,0,0,0.8); padding: 30px; border-radius: 20px; margin: 20px;">
+                <p style="font-size: 24px; margin-bottom: 15px;">Final Score: <span id="finalScore" style="color: #ffeb3b;">0</span></p>
+                <p style="font-size: 18px; margin-bottom: 10px;">Bugs Squashed: <span id="bugsSquashed">0</span></p>
+                <p style="font-size: 18px; margin-bottom: 10px;">Max Streak: <span id="maxStreak">0</span></p>
+                <p style="font-size: 18px; margin-bottom: 10px;">Accuracy: <span id="accuracy">0</span>%</p>
+                <div id="newRecord" style="color: #4caf50; font-size: 20px; margin-top: 15px; display: none;">
+                    🏆 NEW HIGH SCORE! 🏆
+                </div>
+            </div>
+            <button class="button" id="restartButton">PLAY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        class BugBlasterPro {
+            constructor() {
+                this.score = 0;
+                this.timeLeft = 30;
+                this.gameRunning = false;
+                this.bugs = [];
+                this.bugsSquashed = 0;
+                this.totalBugsSpawned = 0;
+                this.streak = 0;
+                this.maxStreak = 0;
+                this.comboMultiplier = 1;
+                this.comboTimer = null;
+                this.difficulty = 'easy';
+                this.powerups = [];
+                this.frozenTime = 0;
+                this.doublePointsTime = 0;
+                this.gameInterval = null;
+                this.spawnInterval = null;
+                this.particleInterval = null;
+                
+                this.bestScore = localStorage.getItem('bugBlasterBest') || 0;
+                
+                this.initializeElements();
+                this.initializeAudio();
+                this.bindEvents();
+                this.updateUI();
+                this.startParticles();
+            }
+
+            initializeElements() {
+                this.gameContainer = document.getElementById('gameContainer');
+                this.scoreElement = document.getElementById('score');
+                this.bestScoreElement = document.getElementById('bestScore');
+                this.timerElement = document.getElementById('timer');
+                this.bugsCountElement = document.getElementById('bugsCount');
+                this.streakElement = document.getElementById('streak');
+                this.comboElement = document.getElementById('combo');
+                this.comboMultiplierElement = document.getElementById('comboMultiplier');
+                this.startScreen = document.getElementById('startScreen');
+                this.startButton = document.getElementById('startButton');
+                this.gameOverElement = document.getElementById('gameOver');
+                this.finalScoreElement = document.getElementById('finalScore');
+                this.bugsSquashedElement = document.getElementById('bugsSquashed');
+                this.maxStreakElement = document.getElementById('maxStreak');
+                this.accuracyElement = document.getElementById('accuracy');
+                this.newRecordElement = document.getElementById('newRecord');
+                this.restartButton = document.getElementById('restartButton');
+                this.difficultyButtons = document.querySelectorAll('.difficulty-btn');
+                this.particlesContainer = document.getElementById('particles');
+                
+                this.bestScoreElement.textContent = this.bestScore;
+            }
+
+            initializeAudio() {
+                this.audioContext = null;
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('Web Audio API not supported');
+                }
+            }
+
+            playSound(frequency, duration, type = 'sine', volume = 0.3) {
+                if (!this.audioContext) return;
+                
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = type;
+                
+                gainNode.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            playComboSound() {
+                if (!this.audioContext) return;
+                
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        this.playSound(440 + (i * 110), 0.1, 'square', 0.2);
+                    }, i * 50);
+                }
+            }
+
+            bindEvents() {
+                this.startButton.addEventListener('click', () => this.startGame());
+                this.restartButton.addEventListener('click', () => this.restartGame());
+                
+                this.difficultyButtons.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.difficultyButtons.forEach(b => b.classList.remove('selected'));
+                        btn.classList.add('selected');
+                        this.difficulty = btn.dataset.difficulty;
+                    });
+                });
+                
+                // Handle audio context for mobile
+                document.addEventListener('touchstart', () => {
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                    }
+                }, { once: true });
+            }
+
+            startGame() {
+                this.gameRunning = true;
+                this.score = 0;
+                this.timeLeft = 30;
+                this.bugsSquashed = 0;
+                this.totalBugsSpawned = 0;
+                this.streak = 0;
+                this.maxStreak = 0;
+                this.comboMultiplier = 1;
+                this.frozenTime = 0;
+                this.doublePointsTime = 0;
+                this.bugs = [];
+                this.powerups = [];
+                
+                this.startScreen.style.display = 'none';
+                this.gameOverElement.style.display = 'none';
+                
+                this.updateUI();
+                
+                const spawnRate = this.difficulty === 'easy' ? 1200 : 
+                                 this.difficulty === 'normal' ? 800 : 600;
+                
+                this.gameInterval = setInterval(() => {
+                    this.timeLeft--;
+                    if (this.frozenTime > 0) this.frozenTime--;
+                    if (this.doublePointsTime > 0) this.doublePointsTime--;
+                    this.updateUI();
+                    
+                    if (this.timeLeft <= 0) {
+                        this.endGame();
+                    }
+                }, 1000);
+                
+                this.spawnInterval = setInterval(() => {
+                    this.spawnBug();
+                    
+                    // Spawn powerups occasionally
+                    if (Math.random() < 0.1) {
+                        this.spawnPowerup();
+                    }
+                }, spawnRate);
+                
+                this.playSound(523, 0.3, 'square', 0.4);
+            }
+
+            spawnBug() {
+                if (!this.gameRunning) return;
+                
+                const bug = document.createElement('div');
+                bug.className = 'bug';
+                
+                let bugType = 'normal';
+                let points = 10;
+                
+                // Determine bug type based on difficulty and random chance
+                const rand = Math.random();
+                if (rand < 0.1) {
+                    bugType = 'golden';
+                    points = 50;
+                } else if (rand < 0.3 && this.difficulty !== 'easy') {
+                    bugType = 'fast';
+                    points = 20;
+                }
+                
+                const bugBody = document.createElement('div');
+                bugBody.className = `bug-body bug-${bugType}`;
+                
+                const antennae = document.createElement('div');
+                antennae.className = 'bug-antennae';
+                bugBody.appendChild(antennae);
+                
+                bug.appendChild(bugBody);
+                
+                const maxX = window.innerWidth - 60;
+                const maxY = window.innerHeight - 140;
+                bug.style.left = Math.random() * maxX + 'px';
+                bug.style.top = (Math.random() * maxY + 100) + 'px';
+                
+                const speed = bugType === 'fast' ? 3 : 
+                             this.difficulty === 'easy' ? 1 : 
+                             this.difficulty === 'normal' ? 2 : 2.5;
+                
+                const bugData = {
+                    element: bug,
+                    type: bugType,
+                    points: points,
+                    speed: speed,
+                    direction: Math.random() * Math.PI * 2,
+                    life: bugType === 'golden' ? 2000 : 4000,
+                    wiggleOffset: Math.random() * Math.PI * 2
+                };
+                
+                bug.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.squashBug(bugData);
+                });
+                
+                bug.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.squashBug(bugData);
+                });
+                
+                this.gameContainer.appendChild(bug);
+                this.bugs.push(bugData);
+                this.totalBugsSpawned++;
+                
+                setTimeout(() => {
+                    if (bug.parentNode) {
+                        this.removeBug(bugData);
+                        this.resetStreak();
+                    }
+                }, bugData.life);
+                
+                this.moveBug(bugData);
+            }
+
+            spawnPowerup() {
+                if (!this.gameRunning || this.powerups.length >= 2) return;
+                
+                const powerup = document.createElement('div');
+                const type = Math.random() < 0.5 ? 'freeze' : 'double';
+                powerup.className = `powerup powerup-${type}`;
+                
+                const maxX = window.innerWidth - 50;
+                const maxY = window.innerHeight - 150;
+                powerup.style.left = Math.random() * maxX + 'px';
+                powerup.style.top = (Math.random() * maxY + 100) + 'px';
+                
+                const powerupData = {
+                    element: powerup,
+                    type: type
+                };
+                
+                powerup.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.collectPowerup(powerupData);
+                });
+                
+                powerup.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.collectPowerup(powerupData);
+                });
+                
+                this.gameContainer.appendChild(powerup);
+                this.powerups.push(powerupData);
+                
+                setTimeout(() => {
+                    if (powerup.parentNode) {
+                        this.removePowerup(powerupData);
+                    }
+                }, 5000);
+            }
+
+            collectPowerup(powerupData) {
+                if (powerupData.type === 'freeze') {
+                    this.frozenTime = 5;
+                    this.bugs.forEach(bug => bug.element.classList.add('frozen'));
+                    this.playSound(330, 0.5, 'triangle', 0.3);
+                } else if (powerupData.type === 'double') {
+                    this.doublePointsTime = 8;
+                    this.playSound(660, 0.5, 'sawtooth', 0.3);
+                }
+                
+                this.removePowerup(powerupData);
+                this.createScorePopup(powerupData.element.offsetLeft, powerupData.element.offsetTop, 
+                                     powerupData.type === 'freeze' ? 'FREEZE!' : 'DOUBLE!');
+            }
+
+            moveBug(bugData) {
+                const moveInterval = setInterval(() => {
+                    if (!bugData.element.parentNode || !this.gameRunning) {
+                        clearInterval(moveInterval);
+                        return;
+                    }
+                    
+                    if (this.frozenTime > 0 && bugData.element.classList.contains('frozen')) {
+                        return;
+                    } else {
+                        bugData.element.classList.remove('frozen');
+                    }
+                    
+                    const rect = bugData.element.getBoundingClientRect();
+                    let newX = rect.left + Math.cos(bugData.direction) * bugData.speed;
+                    let newY = rect.top + Math.sin(bugData.direction) * bugData.speed;
+                    
+                    if (newX < 0 || newX > window.innerWidth - 60) {
+                        bugData.direction = Math.PI - bugData.direction;
+                    }
+                    if (newY < 100 || newY > window.innerHeight - 60) {
+                        bugData.direction = -bugData.direction;
+                    }
+                    
+                    newX = Math.max(0, Math.min(window.innerWidth - 60, newX));
+                    newY = Math.max(100, Math.min(window.innerHeight - 60, newY));
+                    
+                    bugData.element.style.left = newX + 'px';
+                    bugData.element.style.top = newY + 'px';
+                    
+                    if (Math.random() < 0.03) {
+                        bugData.direction += (Math.random() - 0.5) * 0.8;
+                    }
+                }, 50);
+                
+                // Store interval ID for cleanup
+                bugData.moveInterval = moveInterval;
+            }
+
+            squashBug(bugData) {
+                if (!bugData.element.parentNode) return;
+                
+                let points = bugData.points * this.comboMultiplier;
+                if (this.doublePointsTime > 0) points *= 2;
+                
+                this.score += points;
+                this.bugsSquashed++;
+                this.streak++;
+                
+                if (this.streak > this.maxStreak) {
+                    this.maxStreak = this.streak;
+                }
+                
+                // Update combo multiplier
+                if (this.streak >= 5 && this.streak % 3 === 0) {
+                    this.comboMultiplier = Math.min(this.comboMultiplier + 1, 5);
+                    this.showCombo();
+                    this.playComboSound();
+                }
+                
+                this.updateUI();
+                
+                const soundFreq = bugData.type === 'golden' ? 880 : 
+                                 bugData.type === 'fast' ? 660 : 440;
+                this.playSound(soundFreq, 0.15, 'sawtooth', 0.4);
+                
+                bugData.element.classList.add('squashed');
+                
+                this.createSplat(bugData.element.offsetLeft + 25, bugData.element.offsetTop + 25, bugData.type);
+                this.createScorePopup(bugData.element.offsetLeft + 25, bugData.element.offsetTop + 25, `+${points}`);
+                
+                setTimeout(() => {
+                    this.removeBug(bugData);
+                }, 400);
+                
+                // Reset combo timer
+                clearTimeout(this.comboTimer);
+                this.comboTimer = setTimeout(() => {
+                    this.resetStreak();
+                }, 1500);
+            }
+
+            resetStreak() {
+                this.streak = 0;
+                this.comboMultiplier = 1;
+                this.updateUI();
+            }
+
+            showCombo() {
+                this.comboMultiplierElement.textContent = this.comboMultiplier;
+                this.comboElement.classList.remove('show');
+                setTimeout(() => {
+                    this.comboElement.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    this.comboElement.classList.remove('show');
+                }, 1000);
+            }
+
+            createSplat(x, y, type = 'normal') {
+                const splat = document.createElement('div');
+                splat.className = `splat splat-${type}`;
+                splat.style.left = (x - 30) + 'px';
+                splat.style.top = (y - 30) + 'px';
+                
+                this.gameContainer.appendChild(splat);
+                
+                setTimeout(() => {
+                    if (splat.parentNode) {
+                        splat.remove();
+                    }
+                }, 1500);
+            }
+
+            createScorePopup(x, y, text) {
+                const popup = document.createElement('div');
+                popup.className = 'score-popup';
+                popup.textContent = text;
+                popup.style.left = x + 'px';
+                popup.style.top = y + 'px';
+                
+                this.gameContainer.appendChild(popup);
+                
+                setTimeout(() => {
+                    if (popup.parentNode) {
+                        popup.remove();
+                    }
+                }, 1000);
+            }
+
+            removeBug(bugData) {
+                // Clear movement interval
+                if (bugData.moveInterval) {
+                    clearInterval(bugData.moveInterval);
+                }
+                
+                const index = this.bugs.indexOf(bugData);
+                if (index > -1) {
+                    this.bugs.splice(index, 1);
+                }
+                if (bugData.element.parentNode) {
+                    bugData.element.remove();
+                }
+            }
+
+            removePowerup(powerupData) {
+                const index = this.powerups.indexOf(powerupData);
+                if (index > -1) {
+                    this.powerups.splice(index, 1);
+                }
+                if (powerupData.element.parentNode) {
+                    powerupData.element.remove();
+                }
+            }
+
+            startParticles() {
+                this.particleInterval = setInterval(() => {
+                    if (this.particlesContainer.children.length < 10) {
+                        this.createParticle();
+                    }
+                }, 2000);
+            }
+
+            createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                
+                this.particlesContainer.appendChild(particle);
+                
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 3000);
+            }
+
+            updateUI() {
+                this.scoreElement.textContent = this.score;
+                this.timerElement.textContent = this.timeLeft;
+                this.bugsCountElement.textContent = this.bugsSquashed;
+                this.streakElement.textContent = this.streak;
+                
+                // Update timer color based on time left
+                if (this.timeLeft <= 5) {
+                    this.timerElement.style.color = '#ff4444';
+                } else if (this.timeLeft <= 10) {
+                    this.timerElement.style.color = '#ffeb3b';
+                } else {
+                    this.timerElement.style.color = 'white';
+                }
+                
+                // Update UI effects for powerups
+                if (this.frozenTime > 0) {
+                    this.gameContainer.style.filter = 'hue-rotate(180deg) brightness(0.8)';
+                } else {
+                    this.gameContainer.style.filter = 'none';
+                }
+                
+                if (this.doublePointsTime > 0) {
+                    this.scoreElement.style.color = '#4caf50';
+                    this.scoreElement.style.textShadow = '0 0 10px rgba(76, 175, 80, 0.8)';
+                } else {
+                    this.scoreElement.style.color = 'white';
+                    this.scoreElement.style.textShadow = '2px 2px 4px rgba(0,0,0,0.8)';
+                }
+            }
+
+            endGame() {
+                this.gameRunning = false;
+                clearInterval(this.gameInterval);
+                clearInterval(this.spawnInterval);
+                clearInterval(this.particleInterval);
+                clearTimeout(this.comboTimer);
+                
+                // Remove all bugs and powerups with proper cleanup
+                this.bugs.forEach(bugData => {
+                    if (bugData.moveInterval) {
+                        clearInterval(bugData.moveInterval);
+                    }
+                    if (bugData.element.parentNode) {
+                        bugData.element.remove();
+                    }
+                });
+                this.powerups.forEach(powerupData => {
+                    if (powerupData.element.parentNode) {
+                        powerupData.element.remove();
+                    }
+                });
+                this.bugs = [];
+                this.powerups = [];
+                
+                // Reset visual effects
+                this.gameContainer.style.filter = 'none';
+                
+                // Calculate accuracy
+                const accuracy = this.totalBugsSpawned > 0 ? 
+                    Math.round((this.bugsSquashed / this.totalBugsSpawned) * 100) : 0;
+                
+                // Check for new high score
+                let isNewRecord = false;
+                if (this.score > this.bestScore) {
+                    this.bestScore = this.score;
+                    localStorage.setItem('bugBlasterBest', this.bestScore);
+                    this.bestScoreElement.textContent = this.bestScore;
+                    isNewRecord = true;
+                }
+                
+                // Show game over screen
+                this.finalScoreElement.textContent = this.score;
+                this.bugsSquashedElement.textContent = this.bugsSquashed;
+                this.maxStreakElement.textContent = this.maxStreak;
+                this.accuracyElement.textContent = accuracy;
+                
+                if (isNewRecord) {
+                    this.newRecordElement.style.display = 'block';
+                    this.playSound(523, 0.2, 'square', 0.3);
+                    setTimeout(() => this.playSound(659, 0.2, 'square', 0.3), 200);
+                    setTimeout(() => this.playSound(784, 0.4, 'square', 0.3), 400);
+                } else {
+                    this.newRecordElement.style.display = 'none';
+                    this.playSound(330, 0.8, 'triangle', 0.4);
+                }
+                
+                this.gameOverElement.style.display = 'flex';
+            }
+
+            restartGame() {
+                this.gameOverElement.style.display = 'none';
+                this.startScreen.style.display = 'flex';
+            }
+        }
+
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new BugBlasterPro();
+        });
+    </script>
+</body>
+</html>
+                
+                
